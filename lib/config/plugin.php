@@ -6,4 +6,5 @@ return array(
     'logo'        => 'img/nrg.png',
     'version'     => '1.0.0',
     'vendor'      => '670917',
+    'external'    => true
 );

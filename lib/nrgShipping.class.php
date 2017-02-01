@@ -10,6 +10,8 @@
  */
 class nrgShipping extends waShipping
 {
+    private $config;
+
     public function allowedAddress()
     {
         return array(array('country' => 'rus'));
@@ -31,6 +33,58 @@ class nrgShipping extends waShipping
     public function allowedWeightUnit()
     {
         return 'kg';
+    }
+
+    public function getSettingsHTML($params = array())
+    {
+        $view = wa()->getView();
+        if(!version_compare(PHP_VERSION, '5.6.0', '>=')) {
+            $view->assign('errors', array(
+                sprintf('Критическая ошибка. Требуется версия PHP 5.6.0 или старше. Сейчас используется %s. Работа плагина невозможна', PHP_VERSION)
+            ));
+            return $view->fetch($this->path . '/templates/settings.html');
+        }
+
+        $this->initControls();
+
+        $default = array(
+            'instance'            => & $this,
+            'title_wrapper'       => '%s',
+            'description_wrapper' => '<br><span class="hint">%s</span>',
+            'translate'           => array(&$this, '_w'),
+            'control_wrapper'     =>
+                '<div class="field"><div class="name">%s</div><div class="value">%s%s</div></div>',
+            'control_separator'   => '</div><div class="value">',
+        );
+
+        $options = ifempty($params['options'], array());
+        unset($params['options']);
+        $params = array_merge($default, $params);
+
+        foreach ($this->config() as $name => $row) {
+            $row = array_merge($row, $params);
+            $row['value'] = $this->getSettings($name);
+            if (isset($options[$name])) {
+                $row['options'] = $options[$name];
+            }
+            if (isset($params['value']) && isset($params['value'][$name])) {
+                $row['value'] = $params['value'][$name];
+            }
+            if (!empty($row['control_type'])) {
+
+                $tab = ifset($row['subject']);
+                if ($tab) {
+                    $controls[$tab][$name] = waHtmlControl::getControl($row['control_type'], $name, $row);
+                }
+            }
+        }
+
+        $info = $this->info($this->id);
+
+        $view = wa()->getView();
+        $view->assign(compact('controls', 'info'));
+
+        return $view->fetch($this->path . '/templates/settings.html');
     }
 
     public function requestedAddressFields()
@@ -208,7 +262,6 @@ class nrgShipping extends waShipping
         $rates = $this->show_first == 'todoor' ? $todoor + $ware : $ware + $todoor;
 
         return $rates ? $rates : array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));
-
     }
 
     /**
@@ -257,6 +310,33 @@ class nrgShipping extends waShipping
         parent::initControls();
     }
 
+    /**
+     * Чтение настроек из settings.php
+     *
+     */
+    private function config()
+    {
+        if ($this->config === null) {
+            $path = $this->path . '/lib/config/settings.php';
+            if (file_exists($path)) {
+                $this->config = include($path);
+
+                foreach ($this->config as & $config) {
+                    if (isset($config['title'])) {
+                        $config['title'] = $this->_w($config['title']);
+                    }
+                    if (isset($config['description'])) {
+                        $config['description'] = $this->_w($config['description']);
+                    }
+                }
+                unset($config);
+            }
+            if (!is_array($this->config)) {
+                $this->config = array();
+            }
+        }
+        return $this->config;
+    }
 
     /**
      * Превращаем строку из настроек размеров посылки "ДxШxВ" в массив

@@ -302,12 +302,8 @@ class nrgShipping extends waShipping
 
         array_walk($dimensions, function (&$d) {
             $d = floatval(str_replace(',', '.', $d));
-            $d = $d / 10;
+            $d = $d / 100;
         });
-
-        foreach ($dimensions as $k => $v) {
-            $dimensions[$k] = intval($v) > 0 ? intval($v) : 20;
-        }
 
         return array_combine(array('length', 'width', 'height'), $dimensions);
     }

@@ -176,6 +176,7 @@ class nrgShipping extends waShipping
             array_splice($result['transfer'], 1);
         }
 
+        // Варианты доставки "до двери". Магистральный тариф плюс стоимость трансфера по городу плюс стоимость забора от отправителя
         if (ifempty($result['delivery'], array()) && ($this->delivery_type != 'tostore')) {
             foreach ($result['transfer'] as $variant) {
                 $todoor['TODOOR-' . $variant['typeId']] = array(
@@ -188,6 +189,7 @@ class nrgShipping extends waShipping
             }
         }
 
+        // Варианты доставки до терминала Энергии. Просто магистральный тариф плюс стоимость забора от отправителя
         if ($this->delivery_type != 'todoor') {
             foreach ($warehouses as $w) {
                 foreach ($result['transfer'] as $t) {
@@ -202,6 +204,7 @@ class nrgShipping extends waShipping
             }
         }
 
+        // Что показывать в первую очередь
         $rates = $this->show_first == 'todoor' ? $todoor + $ware : $ware + $todoor;
 
         return $rates ? $rates : array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));

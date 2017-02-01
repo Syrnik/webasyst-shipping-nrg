@@ -6,6 +6,7 @@
  * @property string $pickup_price
  * @property string $show_first
  * @property string $sender_city_code
+ * @property array $standard_parcel_dimensions
  */
 class nrgShipping extends waShipping
 {
@@ -52,6 +53,49 @@ class nrgShipping extends waShipping
         return parent::saveSettings($settings);
     }
 
+    /**
+     * @param $name
+     * @param array $params
+     * @return string
+     */
+    public static function settingPackageSelect($name, $params = array())
+    {
+        foreach ($params as $field => $param) {
+            if (strpos($field, 'wrapper')) {
+                unset($params[$field]);
+            }
+        }
+        if (!empty($params['value']) && !is_array($params['value'])) {
+            $params['value'] = array(array('min_weight' => 0, 'package' => $params['value']));
+        }
+
+        if (empty($params['value'])) {
+            $params['value'] = array(array('min_weight' => 0, 'package' => '20x20x20'));
+        }
+
+        waHtmlControl::addNamespace($params, $name);
+
+        $namespace = '';
+        if (!empty($params['namespace'])) {
+            if (is_array($params['namespace'])) {
+                $namespace = array_shift($params['namespace']);
+                while (($namespace_chunk = array_shift($params['namespace'])) !== null) {
+                    $namespace .= "[{$namespace_chunk}]";
+                }
+            } else {
+                $namespace = $params['namespace'];
+            }
+        }
+
+        $view = wa()->getView();
+        $view->assign(array('namespace' => $namespace, 'params' => $params));
+
+        $control = $view->fetch(
+            waConfig::get('wa_path_plugins') . '/shipping/nrg/templates/controls/package_select.html'
+        );
+
+        return $control;
+    }
 
     /**
      *
@@ -79,19 +123,18 @@ class nrgShipping extends waShipping
 
         $warehouses = $this->getWarehouses($target_city['city']['id']);
 
+        try {
+            $dimensions = $this->getDimensions();
+        } catch (waException $e) {
+            return array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));
+        }
+
         $request = array(
             'idCityFrom' => intval($this->sender_city_code),
             'idCityTo'   => intval($target_city['city']['id']),
             'cover'      => 0,
             'idCurrency' => 1,
-            'items'      => array(
-                array(
-                    'weight' => $this->getTotalWeight(),
-                    'width'  => 0.1,
-                    'height' => 0.1,
-                    'length' => 0.1
-                )
-            )
+            'items'      => array(array('weight' => $this->getTotalWeight()) + $dimensions)
         );
 
         try {
@@ -151,58 +194,6 @@ class nrgShipping extends waShipping
 
         return $rates ? $rates : array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));
 
-        /*
-                 * array (
-          'places' => 1,
-          'weight' => 0.10000000000000001,
-          'volume' => 0.001,
-          'cover' => 0,
-          'transfer' =>
-          array (
-            0 =>
-            array (
-              'typeId' => 1,
-              'type' => 'Авто',
-              'price' => 280,
-              'interval' => '5-8 дней',
-              'oversize' => NULL,
-            ),
-            1 =>
-            array (
-              'typeId' => 3,
-              'type' => 'ЖД',
-              'price' => 300,
-              'interval' => '4-6 дней',
-              'oversize' => NULL,
-            ),
-            2 =>
-            array (
-              'typeId' => 2,
-              'type' => 'АВИА',
-              'price' => 550,
-              'interval' => '4-5 дней',
-              'oversize' => NULL,
-            ),
-          ),
-          'request' =>
-          array (
-            'typeId' => 0,
-            'type' => '',
-            'price' => 400,
-            'interval' => '',
-            'oversize' => NULL,
-          ),
-          'delivery' =>
-          array (
-            'typeId' => 0,
-            'type' => '',
-            'price' => 230,
-            'interval' => '',
-            'oversize' => NULL,
-          ),
-        )
-                 *
-                 */
     }
 
     /**
@@ -243,5 +234,66 @@ class nrgShipping extends waShipping
         }
 
         return ifempty($city['warehouses'], array());
+    }
+
+    protected function initControls()
+    {
+        $this->registerControl('PackageSelect');
+        parent::initControls();
+    }
+
+
+    /**
+     * Превращаем строку из настроек размеров посылки "ДxШxВ" в массив
+     * [
+     *  'length'=>float,
+     *  'width' => float,
+     *  'height' => float
+     * ]
+     * @return array
+     * @throws waException
+     */
+    private function getDimensions()
+    {
+        if (!is_array($this->standard_parcel_dimensions)) {
+            $this->standard_parcel_dimensions = array(
+                array('min_weight' => 0, 'package' => $this->standard_parcel_dimensions)
+            );
+        }
+
+        $weight = $this->getTotalWeight();
+        $package = null;
+
+        foreach ($this->standard_parcel_dimensions as $rule) {
+            $min_weight = floatval(str_replace(',', '.', $rule['min_weight']));
+            if ($weight < $min_weight) {
+                break;
+            }
+            $package = $rule['package'];
+        }
+
+        if (is_null($package)) {
+            throw new waException(sprintf("Не найдено подходящего размера упаковки для веса заказа %.3f кг.", $weight));
+        }
+
+        $dimensions = explode('x', strtolower($package));
+
+        $items_cnt = count($dimensions);
+        if ($items_cnt > 3) {
+            $dimensions = array_slice($dimensions, 0, 3);
+        } elseif ($items_cnt < 3) {
+            $dimensions = array_fill($items_cnt - 1, 3 - $items_cnt, 20);
+        }
+
+        array_walk($dimensions, function (&$d) {
+            $d = floatval(str_replace(',', '.', $d));
+            $d = $d / 10;
+        });
+
+        foreach ($dimensions as $k => $v) {
+            $dimensions[$k] = intval($v) > 0 ? intval($v) : 20;
+        }
+
+        return array_combine(array('length', 'width', 'height'), $dimensions);
     }
 }

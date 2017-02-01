@@ -1,0 +1,71 @@
+<div class="block padding" style="padding-left: 0" id="{$params.id}">
+    <table class="zebra">
+        <thead>
+        <tr class="white">
+            <th colspan="2">Вес отправления (кг.)</th>
+            <th>&nbsp;</th>
+            <th>Размер упаковки (см.)</th>
+            <th>&nbsp;</th>
+        </tr>
+        </thead>
+        <tfoot>
+        <tr class="white">
+            <td colspan="3">
+                <a href="javascript:void(0)" class="inline-link package-selector-add-pkg-rule-btn"><i class="icon16 add"></i> <b><i>Добавить
+                            размер</i></b></a>
+            </td>
+            <td><span class="hint">ДxШxВ - средние размеры типичной посылки, (длина)x(ширина)x(высота). <b>Используйте
+                        латинскую x (икс) в качестве разделителя!</b></span></td>
+            <td></td>
+        </tr>
+        </tfoot>
+        {foreach $params.value as $value}
+            <tr class="package-selector-pkg-row">
+                <td class="min-width">&gt;</td>
+                <td>
+                    <input type="text" name="{$namespace|escape}[{$value@index}][min_weight]"
+                           value="{$value.min_weight|escape}">
+                </td>
+                <td>→</td>
+                <td>
+                    <input type="text" name="{$namespace|escape}[{$value@index}][package]"
+                           value="{$value.package|escape}">
+                </td>
+                <td><a href="javascript:void(0)" class="package-selector-remove-pkg-rule-btn" title="Удалить"><i
+                                class="icon16 delete"></i>Удалить</a></td>
+            </tr>
+        {/foreach}
+    </table>
+</div>
+<script type="text/javascript">
+    $(function () {
+        $('#{$params.id}')
+                .on('click', '.package-selector-add-pkg-rule-btn', function () {
+                    var $this = $(this);
+                    var $table = $this.closest('table');
+                    var $last = $table.find('tr.package-selector-pkg-row:last');
+                    var $clone = $last.clone();
+
+                    $clone.find('input').each(function () {
+                        var $input = $(this);
+                        var name = $input.attr('name');
+                        $input.attr('name', name.replace(/\[standard_parcel_dimensions\]\[(\d+)\]/, function (str, p1) {
+                            return '[standard_parcel_dimensions][' + (parseInt(p1, 10) + 1) + ']';
+                        }));
+                        $input.val('');
+                    });
+                    $last.after($clone);
+                    return false;
+                })
+                .on('click', '.package-selector-remove-pkg-rule-btn', function(){
+                    var $this = $(this);
+                    var $table = $this.closest('table');
+                    if ($('tr.package-selector-pkg-row', $table).length > 1) {
+                        $this.closest('tr').remove();
+                    } else {
+                        $this.closest('tr').find('input').val('');
+                    }
+                    return false;
+                })
+    });
+</script>

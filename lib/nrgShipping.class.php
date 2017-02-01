@@ -106,6 +106,9 @@ class nrgShipping extends waShipping
      */
     protected function calculate()
     {
+        if(!version_compare(PHP_VERSION, '5.6.0', '>=')) {
+            return 'Расчет стоимости доставки невозможен';
+        }
 
         if (empty($this->sender_city_code)) {
             return 'Расчет стоимости доставки невозможен';

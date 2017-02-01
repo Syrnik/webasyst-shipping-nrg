@@ -10,6 +10,10 @@
  */
 class nrgShipping extends waShipping
 {
+    public function allowedAddress()
+    {
+        return array(array('country' => 'rus'));
+    }
 
     /**
      *
@@ -102,8 +106,13 @@ class nrgShipping extends waShipping
      */
     protected function calculate()
     {
+
         if (empty($this->sender_city_code)) {
             return 'Расчет стоимости доставки невозможен';
+        }
+
+        if($this->getAddress('country') !== 'rus') {
+            return array(array('rate' => null, 'comment' => 'Расчет стоимости может быть выполнен только для доставки по России'));
         }
 
         $zip = mb_ereg_replace('\D', '', $this->getAddress('zip'));

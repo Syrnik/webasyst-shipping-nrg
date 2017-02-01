@@ -155,6 +155,11 @@ class nrgShipping extends waShipping
         return $control;
     }
 
+    public function tracking($tracking_id = null)
+    {
+        return 'Отследить сосояние доставки по номеру накладной на сайте ТК Энергия <a href="https://nrg-tk.ru/client/tracking/">https://nrg-tk.ru/client/tracking/</a>';
+    }
+
     /**
      *
      */

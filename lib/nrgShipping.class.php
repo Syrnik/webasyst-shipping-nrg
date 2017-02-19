@@ -312,6 +312,16 @@ class nrgShipping extends waShipping
         return ifempty($city['warehouses'], array());
     }
 
+    protected function hasZeroWeightItems()
+    {
+        $items = $this->getItems();
+        $zero_weighted = array_filter($items, function ($item) {
+            return floatval(str_replace(',', '.', $item['weight'])) == 0;
+        });
+
+        return count($zero_weighted) > 0;
+    }
+
     protected function initControls()
     {
         $this->registerControl('PackageSelect');

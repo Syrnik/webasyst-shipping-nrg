@@ -81,12 +81,14 @@ return array(
         'description'  => 'Если среди отправляемых товарое есть хотя бы один, вес у которого равен нулю или не указан, то расчет можно прервать и показать ошибку',
         'control_type' => waHtmlControl::SELECT,
         'value'        => 'continue',
-        'options'      => array('continue' => 'Продолжить расчет', 'stop' => 'Прервать расчет')
+        'options'      => array('continue' => 'Продолжить расчет', 'stop' => 'Прервать расчет'),
+        'subject'      => 'main'
     ),
     'zero_weight_item_msg'       => array(
         'title'        => 'Сообщение об ошибке для товара с нулевым весом',
         'description'  => 'Сообщение об ошибке, которое будет  показано, если расчет прерван из-за товара с нулевым весом',
         'control_type' => waHtmlControl::INPUT,
-        'placeholder'  => 'Недоступно'
+        'placeholder'  => 'Недоступно',
+        'subject'      => 'main'
     )
 );

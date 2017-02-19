@@ -40,7 +40,7 @@ class nrgShipping extends waShipping
     public function getSettingsHTML($params = array())
     {
         $view = wa()->getView();
-        if(!version_compare(PHP_VERSION, '5.6.0', '>=')) {
+        if (!version_compare(PHP_VERSION, '5.6.0', '>=')) {
             $view->assign('errors', array(
                 sprintf('Критическая ошибка. Требуется версия PHP 5.6.0 или старше. Сейчас используется %s. Работа плагина невозможна', PHP_VERSION)
             ));
@@ -170,7 +170,7 @@ class nrgShipping extends waShipping
      */
     protected function calculate()
     {
-        if(!version_compare(PHP_VERSION, '5.6.0', '>=')) {
+        if (!version_compare(PHP_VERSION, '5.6.0', '>=')) {
             return 'Расчет стоимости доставки невозможен';
         }
 
@@ -178,7 +178,7 @@ class nrgShipping extends waShipping
             return 'Расчет стоимости доставки невозможен';
         }
 
-        if($this->getAddress('country') !== 'rus') {
+        if ($this->getAddress('country') !== 'rus') {
             return array(array('rate' => null, 'comment' => 'Расчет стоимости может быть выполнен только для доставки по России'));
         }
 
@@ -190,7 +190,7 @@ class nrgShipping extends waShipping
             return array(array('rate' => null, 'comment' => 'Неправильный почтовый индекс города доставки'));
         }
 
-        if(($this->zero_weight_item == 'stop') && $this->hasZeroWeightItems()){
+        if (($this->zero_weight_item == 'stop') && $this->hasZeroWeightItems()) {
             $msg = mb_ereg_replace('^[[:space:]]*([\s\S]*?)[[:space:]]*$', '\1', $this->zero_weight_item_msg);
             return empty($msg) ? 'Недоступно' : $msg;
         }
@@ -323,7 +323,7 @@ class nrgShipping extends waShipping
     {
         $items = $this->getItems();
         $zero_weighted = array_filter($items, function ($item) {
-            return floatval(str_replace(',', '.', $item['weight'])) == 0;
+            return !array_key_exists('weight', $item) || (floatval(str_replace(',', '.', $item['weight'])) == 0);
         });
 
         return count($zero_weighted) > 0;
@@ -407,6 +407,9 @@ class nrgShipping extends waShipping
 
         array_walk($dimensions, function (&$d) {
             $d = floatval(str_replace(',', '.', $d));
+            if ($d == 0) {
+                $d = 10;
+            }
             $d = $d / 100;
         });
 

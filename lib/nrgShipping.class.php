@@ -7,6 +7,8 @@
  * @property string $show_first
  * @property string $sender_city_code
  * @property array $standard_parcel_dimensions
+ * @property string $zero_weight_item
+ * @property string $zero_weight_item_msg
  */
 class nrgShipping extends waShipping
 {
@@ -186,6 +188,11 @@ class nrgShipping extends waShipping
         }
         if (mb_strlen($zip) != 6) {
             return array(array('rate' => null, 'comment' => 'Неправильный почтовый индекс города доставки'));
+        }
+
+        if(($this->zero_weight_item == 'stop') && $this->hasZeroWeightItems()){
+            $msg = mb_ereg_replace('^[[:space:]]*([\s\S]*?)[[:space:]]*$', '\1', $this->zero_weight_item_msg);
+            return empty($msg) ? 'Недоступно' : $msg;
         }
 
         $net = new waNet(array('format' => waNet::FORMAT_JSON, 'verify' => false));

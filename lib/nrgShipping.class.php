@@ -89,7 +89,10 @@ class nrgShipping extends waShipping
 
     public function requestedAddressFields()
     {
-        return array('zip' => array('cost' => true, 'required' => true));
+        return array(
+            'country' => ['cost' => true, 'required' => true],
+            'zip'     => ['cost' => true, 'required' => true]
+        );
     }
 
     public function saveSettings($settings = array())

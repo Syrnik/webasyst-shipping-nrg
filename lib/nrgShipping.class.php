@@ -254,7 +254,7 @@ class nrgShipping extends waShipping
         if (ifempty($result['delivery'], array()) && ($this->delivery_type != 'tostore')) {
             foreach ($result['transfer'] as $variant) {
                 $todoor['TODOOR-' . $variant['typeId']] = array(
-                    'rate'         => $variant['price'] + $result['delivery']['price'] + $pickup_price,
+                    'rate'         => $this->calcTotalCost($variant['price'] + $result['delivery']['price'] + $pickup_price),
                     'currency'     => 'RUB',
                     'name'         => $variant['type'] . '+до двери',
                     'comment'      => $variant['type'] . '-доставка и экспедирование по городу до адреса',
@@ -269,7 +269,7 @@ class nrgShipping extends waShipping
                 foreach ($result['transfer'] as $t) {
                     $ware['WRH-' . $w['id'] . '-' . $t['typeId']] = array(
                         'name'         => $w['title'] . ' / ' . $t['type'],
-                        'rate'         => $t['price'] + $pickup_price,
+                        'rate'         => $this->calcTotalCost($t['price'] + $pickup_price),
                         'currency'     => 'RUB',
                         'comment'      => $w['address'] . '; ' . $w['phone'],
                         'est_delivery' => $t['interval']

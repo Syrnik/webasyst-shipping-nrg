@@ -91,6 +91,7 @@ return array(
             'shipping'       => 'Доставка',
             'formula'        => 'Формула'
         ),
+        'subject'      => 'main'
     ),
     'handling_cost'              => array(
         'value'        => 0,
@@ -101,6 +102,7 @@ return array(
             'в которой доступны переменные Z (стоимость заказа) и S (стоимость доставки). Подробнее о формуле ' .
             'смотрите <a href="//www.webasyst.ru/store/plugin/shipping/nrg/#formula">на странице описания плагина</a>',
         'control_type' => waHtmlControl::INPUT,
+        'subject'      => 'main'
     ),
     'rounding'                   => array(
         'value'        => '0.01',
@@ -113,6 +115,7 @@ return array(
             '1'    => 'до 1.00 (целого рубля)',
             '10'   => 'до 10 (десятков рублей)',
             '100'  => 'до 100 (сотен рублей)'),
+        'subject'      => 'main'
     ),
     'rounding_type'              => array(
         'value'        => 'std',
@@ -122,6 +125,7 @@ return array(
             'всегда в большую сторону, <b>вниз</b> - всегда в меньшую сторону',
         'control_type' => waHtmlControl::SELECT,
         'options'      => array('std' => 'Обычное', 'up' => 'Вверх', 'down' => 'Вниз'),
+        'subject'      => 'main'
     ),
     'zero_weight_item'           => array(
         'title'        => 'Товар с нулевым весом',

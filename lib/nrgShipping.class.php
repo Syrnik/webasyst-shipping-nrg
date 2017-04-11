@@ -9,6 +9,11 @@
  * @property array $standard_parcel_dimensions
  * @property string $zero_weight_item
  * @property string $zero_weight_item_msg
+ *
+ * @property string $handling_base
+ * @property string $handling_cost
+ * @property string $rounding
+ * @property string $rounding_type
  */
 class nrgShipping extends waShipping
 {
@@ -340,6 +345,57 @@ class nrgShipping extends waShipping
     {
         $this->registerControl('PackageSelect');
         parent::initControls();
+    }
+
+    /**
+     * Расчет наценки
+     *
+     * @param float|string $nrg_cost
+     * @return float
+     */
+    private function calcTotalCost($nrg_cost)
+    {
+        $nrg_cost = floatval(str_replace(',', '.', $nrg_cost));
+        $percent_sign_pos = strpos($this->handling_cost, '%');
+
+        // Если процентов нет, то и думать нечего. Приплюсуем и все дела
+        if (($percent_sign_pos === false) && ($this->handling_base != 'formula')) {
+            return $this->roundPrice(floatval(str_replace(',', '.', $this->handling_cost)) + $nrg_cost);
+        }
+
+        if ($this->handling_base == 'formula') {
+            $EvalMath = new EvalMath();
+            $EvalMath->suppress_errors = 1;
+
+            $EvalMath->evaluate('z=' . str_replace(',', '.', (string)$this->getTotalPrice()));
+            $EvalMath->evaluate('s=' . str_replace(',', '.', (string)$nrg_cost));
+
+            $math_result = $EvalMath->evaluate($this->handling_cost);
+            if ($math_result === false) {
+                self::log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $EvalMath->last_error . ')');
+                return $this->roundPrice($nrg_cost);
+            }
+            return $this->roundPrice($math_result);
+        }
+
+        switch ($this->handling_base) {
+            case 'shipping' :
+                $base = $nrg_cost;
+                break;
+            case 'order_shipping':
+                $base = $this->getTotalPrice() + $nrg_cost;
+                break;
+            case 'order':
+            default:
+                $base = $this->getTotalPrice();
+        }
+
+        $cost = substr($this->handling_cost, 0, $percent_sign_pos);
+        if (strlen($cost) < 1) {
+            return $nrg_cost;
+        }
+
+        return $this->roundPrice($nrg_cost + $base * floatval($cost) / 100);
     }
 
     /**

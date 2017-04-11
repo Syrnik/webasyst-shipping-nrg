@@ -478,4 +478,11 @@ class nrgShipping extends waShipping
 
         return array_combine(array('length', 'width', 'height'), $dimensions);
     }
+
+    private static function log($msg, $critical = false)
+    {
+        if (waSystemConfig::isDebug() || $critical) {
+            waLog::log($msg, 'shipping/nrg.log');
+        }
+    }
 }

@@ -9,6 +9,11 @@
  * @property array $standard_parcel_dimensions
  * @property string $zero_weight_item
  * @property string $zero_weight_item_msg
+ *
+ * @property string $handling_base
+ * @property string $handling_cost
+ * @property string $rounding
+ * @property string $rounding_type
  */
 class nrgShipping extends waShipping
 {
@@ -249,7 +254,7 @@ class nrgShipping extends waShipping
         if (ifempty($result['delivery'], array()) && ($this->delivery_type != 'tostore')) {
             foreach ($result['transfer'] as $variant) {
                 $todoor['TODOOR-' . $variant['typeId']] = array(
-                    'rate'         => $variant['price'] + $result['delivery']['price'] + $pickup_price,
+                    'rate'         => $this->calcTotalCost($variant['price'] + $result['delivery']['price'] + $pickup_price),
                     'currency'     => 'RUB',
                     'name'         => $variant['type'] . '+до двери',
                     'comment'      => $variant['type'] . '-доставка и экспедирование по городу до адреса',
@@ -264,7 +269,7 @@ class nrgShipping extends waShipping
                 foreach ($result['transfer'] as $t) {
                     $ware['WRH-' . $w['id'] . '-' . $t['typeId']] = array(
                         'name'         => $w['title'] . ' / ' . $t['type'],
-                        'rate'         => $t['price'] + $pickup_price,
+                        'rate'         => $this->calcTotalCost($t['price'] + $pickup_price),
                         'currency'     => 'RUB',
                         'comment'      => $w['address'] . '; ' . $w['phone'],
                         'est_delivery' => $t['interval']
@@ -329,10 +334,68 @@ class nrgShipping extends waShipping
         return count($zero_weighted) > 0;
     }
 
+    protected function init()
+    {
+        waAutoload::getInstance()->add('EvalMath', "wa-plugins/shipping/nrg/lib/vendors/evalmath.class.php");
+        waAutoload::getInstance()->add('EvalMathStack', "wa-plugins/shipping/nrg/lib/vendors/evalmath.class.php");
+        parent::init();
+    }
+
     protected function initControls()
     {
         $this->registerControl('PackageSelect');
         parent::initControls();
+    }
+
+    /**
+     * Расчет наценки
+     *
+     * @param float|string $nrg_cost
+     * @return float
+     */
+    private function calcTotalCost($nrg_cost)
+    {
+        $nrg_cost = floatval(str_replace(',', '.', $nrg_cost));
+        $percent_sign_pos = strpos($this->handling_cost, '%');
+
+        // Если процентов нет, то и думать нечего. Приплюсуем и все дела
+        if (($percent_sign_pos === false) && ($this->handling_base != 'formula')) {
+            return $this->roundPrice(floatval(str_replace(',', '.', $this->handling_cost)) + $nrg_cost);
+        }
+
+        if ($this->handling_base == 'formula') {
+            $EvalMath = new EvalMath();
+            $EvalMath->suppress_errors = 1;
+
+            $EvalMath->evaluate('z=' . str_replace(',', '.', (string)$this->getTotalPrice()));
+            $EvalMath->evaluate('s=' . str_replace(',', '.', (string)$nrg_cost));
+
+            $math_result = $EvalMath->evaluate($this->handling_cost);
+            if ($math_result === false) {
+                self::log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $EvalMath->last_error . ')');
+                return $this->roundPrice($nrg_cost);
+            }
+            return $this->roundPrice($math_result);
+        }
+
+        switch ($this->handling_base) {
+            case 'shipping' :
+                $base = $nrg_cost;
+                break;
+            case 'order_shipping':
+                $base = $this->getTotalPrice() + $nrg_cost;
+                break;
+            case 'order':
+            default:
+                $base = $this->getTotalPrice();
+        }
+
+        $cost = substr($this->handling_cost, 0, $percent_sign_pos);
+        if (strlen($cost) < 1) {
+            return $nrg_cost;
+        }
+
+        return $this->roundPrice($nrg_cost + $base * floatval($cost) / 100);
     }
 
     /**
@@ -414,5 +477,44 @@ class nrgShipping extends waShipping
         });
 
         return array_combine(array('length', 'width', 'height'), $dimensions);
+    }
+
+    private static function log($msg, $critical = false)
+    {
+        if (waSystemConfig::isDebug() || $critical) {
+            waLog::log($msg, 'shipping/nrg.log');
+        }
+    }
+
+    /**
+     * Округление по заданным в настройках правилам
+     *
+     * @param float|string $price
+     * @return float
+     */
+    private function roundPrice($price)
+    {
+        if ($this->rounding == '0.01') {
+            return $price;
+        }
+
+        $price = floatval(str_replace(',', '.', $price));
+        $rounding = floatval($this->rounding);
+        $precision = intval(0 - log10($rounding));
+        $rounded = round($price, $precision);
+
+        if ($this->rounding_type == 'std') {
+            return $rounded;
+        }
+
+        if (($this->rounding_type == 'up') && ($price > $rounded)) {
+            return $rounded + $rounding;
+        }
+
+        if (($this->rounding_type == 'down') && ($rounded > $price)) {
+            return $rounded - $rounding;
+        }
+
+        return $rounded;
     }
 }

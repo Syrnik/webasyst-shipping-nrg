@@ -10,6 +10,8 @@
  * @property string $zero_weight_item
  * @property string $zero_weight_item_msg
  *
+ * @property string $sender_city_name
+ *
  * @property string $handling_base
  * @property string $handling_cost
  * @property string $rounding
@@ -92,6 +94,49 @@ class nrgShipping extends waShipping
         $view->assign(compact('controls', 'info'));
 
         return $view->fetch($this->path . '/templates/settings.html');
+    }
+
+    /**
+     * @param array $address
+     * @return bool
+     */
+    public function isAllowedAddress($address = array())
+    {
+        $allowed = parent::isAllowedAddress($address);
+
+        if (!$allowed) {
+            return $allowed;
+        }
+
+        if (empty($address)) {
+            $address = $this->getAddress();
+        }
+
+        $city_name = trim(mb_strtolower(ifempty($address['city'], '')));
+        $my_city = trim(mb_strtolower($this->sender_city_name));
+        if ($city_name == $my_city) {
+            return false;
+        }
+
+        $zip = mb_ereg_replace('\D', '', ifempty($address['zip'], ''));
+        if (strlen($zip) != 6) {
+            return $allowed;
+        }
+
+        $net = new waNet(array('format' => waNet::FORMAT_JSON, 'verify' => false));
+        try {
+            $target_city = $net->query('https://api2.nrg-tk.ru/v2/search/city?' . http_build_query(['zipCode' => $zip]));
+        } catch (waException $e) {
+            return false;
+        }
+
+
+        $my_city_code = ifempty($target_city['city']['id'], null);
+        if (!$my_city_code) {
+            return false;
+        }
+
+        return $my_city_code != $this->sender_city_code;
     }
 
     public function requestedAddressFields()

@@ -68,6 +68,16 @@ return array(
         'options'      => array('all' => 'Выключить', 'cheapest' => 'Самый дешевый'),
         'subject'      => 'main'
     ),
+    'city_hide'                  => array(
+        'title'        => 'Скрытие метода',
+        'description'  => 'Если на этапе контактной информации выбран город или индекс, для которых нет доставки, то '.
+            'можно вообще не показывать метод доставки вместо надписи &laquo;Недоступно&raquo;.<br>'.
+            '<i class="icon16 exclamation"></i>Но тогда у покупателя не будет шансов ввести другой почтовый индекс!',
+        'control_type' => waHtmlControl::SELECT,
+        'value'        => 'never',
+        'options'      => array('never' => 'Не скрывать', 'sender_only' => 'Только город-отправитель', 'always' => 'Любой недоступный город'),
+        'subject'      => 'main'
+    ),
     'standard_parcel_dimensions' => array(
         'value'        => '20x20x20',
         'title'        => 'Средние размеры отправления в сантиметрах',

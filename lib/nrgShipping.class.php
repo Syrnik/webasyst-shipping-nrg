@@ -16,6 +16,8 @@
  * @property string $handling_cost
  * @property string $rounding
  * @property string $rounding_type
+ *
+ * @property string $city_hide
  */
 class nrgShipping extends waShipping
 {
@@ -104,7 +106,7 @@ class nrgShipping extends waShipping
     {
         $allowed = parent::isAllowedAddress($address);
 
-        if (!$allowed) {
+        if (($this->city_hide == 'never') || !$allowed) {
             return $allowed;
         }
 
@@ -112,12 +114,14 @@ class nrgShipping extends waShipping
             $address = $this->getAddress();
         }
 
+        // название города отправителя == названию города получателя.
         $city_name = trim(mb_strtolower(ifempty($address['city'], '')));
         $my_city = trim(mb_strtolower($this->sender_city_name));
         if ($city_name == $my_city) {
             return false;
         }
 
+        // индекс должен быть 6 цифр
         $zip = mb_ereg_replace('\D', '', ifempty($address['zip'], ''));
         if (strlen($zip) != 6) {
             return $allowed;
@@ -127,12 +131,15 @@ class nrgShipping extends waShipping
         try {
             $target_city = $net->query('https://api2.nrg-tk.ru/v2/search/city?' . http_build_query(['zipCode' => $zip]));
         } catch (waException $e) {
-            return false;
+            if ($this->city_hide == 'always') {
+                return false;
+            }
+            return $allowed;
         }
 
-
         $my_city_code = ifempty($target_city['city']['id'], null);
-        if (!$my_city_code) {
+        // неизвестный город
+        if (!$my_city_code && ($this->city_hide == 'always')) {
             return false;
         }
 

@@ -9,9 +9,9 @@
 
 return array(
     'php'           => array(
-        'version' => '5.6.0', 'strict' => true
+        'version' => '>=5.6.0', 'strict' => true
     ),
     'app.installer' => array(
-        'version' => '1.6.0', 'strict' => true
+        'version' => '>=1.6.0', 'strict' => true
     )
 );

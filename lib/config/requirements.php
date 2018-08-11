@@ -1,8 +1,8 @@
 <?php
 /**
  * @author Serge Rodovnichenko <serge@syrnik.com>
- * @version 1.0.1
- * @copyright Serge Rodovnichenko, 2016
+ * @version 1.4.0
+ * @copyright Serge Rodovnichenko, 2016-2018
  * @license http://www.webasyst.com/terms/#eula Webasyst
  * @package nrg
  */
@@ -12,6 +12,6 @@ return array(
         'version' => '>=5.6.0', 'strict' => true
     ),
     'app.installer' => array(
-        'version' => '>=1.6.0', 'strict' => true
+        'version' => 'latest', 'strict' => true
     )
 );

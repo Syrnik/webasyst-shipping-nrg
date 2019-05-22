@@ -1,0 +1,14 @@
+{
+  "name": "syrnik/wa-shipping-utils",
+  "license": "propritery",
+  "autoload": {
+    "psr-4": {
+      "Syrnik\\": "src/"
+    }
+  },
+  "require": {
+    "php": "^5.6",
+    "webit/eval-math": "1.*",
+    "ext-mbstring": "*"
+  }
+}

@@ -386,10 +386,12 @@ class nrgShipping extends waShipping
         return count($zero_weighted) > 0;
     }
 
+    /**
+     * @see waShipping::init()
+     */
     protected function init()
     {
-        waAutoload::getInstance()->add('EvalMath', "wa-plugins/shipping/nrg/lib/vendors/evalmath.class.php");
-        waAutoload::getInstance()->add('EvalMathStack', "wa-plugins/shipping/nrg/lib/vendors/evalmath.class.php");
+        require_once 'vendors/autoload.php';
         parent::init();
     }
 

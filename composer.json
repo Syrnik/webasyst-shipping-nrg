@@ -1,0 +1,28 @@
+{
+  "name": "syrnik/shipping-nrg",
+  "license": "proprietary",
+  "authors": [
+    {
+      "name": "Serge Rodovnichenko",
+      "homepage": "https://www.syrnik.com"
+    }
+  ],
+  "config": {
+    "vendor-dir": "lib/vendors",
+    "platform": {
+      "php": "5.6.0"
+    },
+    "secure-http": false
+  },
+  "repositories": [
+    {
+      "type": "composer",
+      "url": "http://satis.syrnik.com:8080/"
+    }
+  ],
+  "require": {
+    "syrnik/wa-shipping-utils": "^1.5",
+    "webit/eval-math": "^1.0",
+    "serger/cake-utility": "^1"
+  }
+}

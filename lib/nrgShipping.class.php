@@ -245,15 +245,15 @@ class nrgShipping extends waShipping
         }
 
         if ($this->getAddress('country') !== 'rus') {
-            return array(array('rate' => null, 'comment' => 'Расчет стоимости может быть выполнен только для доставки по России'));
+            return array(['rate' => null, 'comment' => 'Расчет стоимости может быть выполнен только для доставки по России']);
         }
 
         $zip = mb_ereg_replace('\D', '', $this->getAddress('zip'));
         if (empty($zip)) {
-            return array(array('rate' => null, 'comment' => 'Не указан почтовый индекс города доставки'));
+            return array(['rate' => null, 'comment' => 'Не указан почтовый индекс города доставки']);
         }
         if (mb_strlen($zip) != 6) {
-            return array(array('rate' => null, 'comment' => 'Неправильный почтовый индекс города доставки'));
+            return array(['rate' => null, 'comment' => 'Неправильный почтовый индекс города доставки']);
         }
 
         if (($this->zero_weight_item == 'stop') && $this->hasZeroWeightItems()) {
@@ -261,11 +261,11 @@ class nrgShipping extends waShipping
             return empty($msg) ? 'Недоступно' : $msg;
         }
 
-        $net = new waNet(array('format' => waNet::FORMAT_JSON, 'verify' => false));
+        $net = new waNet(['format' => waNet::FORMAT_JSON, 'verify' => false]);
         try {
             $target_city = $net->query('https://api2.nrg-tk.ru/v2/search/city?' . http_build_query(['zipCode' => $zip]));
         } catch (waException $e) {
-            return array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));
+            return array(['rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна']);
         }
 
         $warehouses = $this->getWarehouses($target_city['city']['id']);
@@ -285,12 +285,13 @@ class nrgShipping extends waShipping
         );
 
         try {
+            /** @var array $result */
             $result = $net->query('https://api2.nrg-tk.ru/v2/price', $request, waNet::METHOD_POST);
             if (empty($result['transfer'])) {
                 throw new waException();
             }
         } catch (waException $e) {
-            return array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));
+            return array(['rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна']);
         }
 
         $todoor = array();
@@ -319,7 +320,8 @@ class nrgShipping extends waShipping
                     'currency'     => 'RUB',
                     'name'         => $variant['type'] . '+до двери',
                     'comment'      => $variant['type'] . '-доставка и экспедирование по городу до адреса',
-                    'est_delivery' => $variant['interval']
+                    'est_delivery' => $variant['interval'],
+                    'type'         => waShipping::TYPE_TODOOR
                 );
             }
         }
@@ -328,12 +330,14 @@ class nrgShipping extends waShipping
         if ($this->delivery_type != 'todoor') {
             foreach ($warehouses as $w) {
                 foreach ($result['transfer'] as $t) {
-                    $ware['WRH-' . $w['id'] . '-' . $t['typeId']] = array(
+                    $id = 'WRH-' . $w['id'] . '-' . $t['typeId'];
+                    $ware[$id] = array(
                         'name'         => $w['title'] . ' / ' . $t['type'],
                         'rate'         => $this->calcTotalCost($t['price'] + $pickup_price),
                         'currency'     => 'RUB',
                         'comment'      => $w['address'] . '; ' . $w['phone'],
-                        'est_delivery' => $t['interval']
+                        'est_delivery' => $t['interval'],
+                        'type'         => waShipping::TYPE_PICKUP
                     );
                 }
             }

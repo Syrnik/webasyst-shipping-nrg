@@ -337,7 +337,14 @@ class nrgShipping extends waShipping
                         'currency'     => 'RUB',
                         'comment'      => $w['address'] . '; ' . $w['phone'],
                         'est_delivery' => $t['interval'],
-                        'type'         => waShipping::TYPE_PICKUP
+                        'type'         => waShipping::TYPE_PICKUP,
+                        'custom_data'  => ['pickup' => [
+                            'id'          => $id,
+                            'lat'         => $w['latitude'],
+                            'lng'         => $w['longitude'],
+                            'name'        => $w['title'] . ' (' . $t['type'] . ')',
+                            'description' => $w['address']
+                        ]]
                     );
                 }
             }

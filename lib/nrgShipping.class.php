@@ -1,4 +1,13 @@
 <?php
+/**
+ * @author Serge Rodovnichenko <serge@syrnik.com>
+ * @copyright Serge Rodovnichenko, 2015-2019
+ * @license http://www.webasyst.com/terms/#eula Webasyst
+ */
+
+use SergeR\CakeUtility\Hash;
+use Syrnik\WaShippingUtils;
+use Webit\Util\EvalMath\EvalMath;
 
 /**
  * @property string $delivery_type
@@ -68,7 +77,7 @@ class nrgShipping extends waShipping
             'control_separator'   => '</div><div class="value">',
         );
 
-        $options = ifempty($params['options'], array());
+        $options = (array)Hash::get($params, 'options');
         unset($params['options']);
         $params = array_merge($default, $params);
 
@@ -83,7 +92,7 @@ class nrgShipping extends waShipping
             }
             if (!empty($row['control_type'])) {
 
-                $tab = ifset($row['subject']);
+                $tab = Hash::get($row, 'subject');
                 if ($tab) {
                     $controls[$tab][$name] = waHtmlControl::getControl($row['control_type'], $name, $row);
                 }
@@ -115,14 +124,14 @@ class nrgShipping extends waShipping
         }
 
         // название города отправителя == названию города получателя.
-        $city_name = trim(mb_strtolower(ifempty($address['city'], '')));
-        $my_city = trim(mb_strtolower($this->sender_city_name));
+        $city_name = WaShippingUtils::replaceYo(WaShippingUtils::mb_trim(mb_strtolower(Hash::get($address, 'city'))));
+        $my_city = WaShippingUtils::replaceYo(WaShippingUtils::mb_trim(mb_strtolower($this->sender_city_name)));
         if ($city_name == $my_city) {
             return false;
         }
 
         // индекс должен быть 6 цифр
-        $zip = mb_ereg_replace('\D', '', ifempty($address['zip'], ''));
+        $zip = mb_ereg_replace('\D', '', Hash::get($address, 'zip', ''));
         if (strlen($zip) != 6) {
             return $allowed;
         }
@@ -137,7 +146,7 @@ class nrgShipping extends waShipping
             return $allowed;
         }
 
-        $my_city_code = ifempty($target_city['city']['id'], null);
+        $my_city_code = Hash::get($target_city, 'city.id');
         // неизвестный город
         if (!$my_city_code && ($this->city_hide == 'always')) {
             return false;
@@ -162,8 +171,8 @@ class nrgShipping extends waShipping
                 $net = new waNet(array('format' => waNet::FORMAT_JSON, 'verify' => false));
                 try {
                     $result = $net->query('https://api2.nrg-tk.ru/v2/search/city?' . http_build_query(['zipCode' => $settings['sender_zip']]));
-                    $settings['sender_city_code'] = ifempty($result['city']['id'], '');
-                    $settings['sender_city_name'] = ifempty($result['city']['name']);
+                    $settings['sender_city_code'] = Hash::get($result, 'city.id', '');
+                    $settings['sender_city_name'] = Hash::get($result, 'city.name', '');
                 } catch (waException $e) {
                     throw new waException('Не удалось определить город отправителя по почтовому индексу');
                 }
@@ -236,15 +245,15 @@ class nrgShipping extends waShipping
         }
 
         if ($this->getAddress('country') !== 'rus') {
-            return array(array('rate' => null, 'comment' => 'Расчет стоимости может быть выполнен только для доставки по России'));
+            return array(['rate' => null, 'comment' => 'Расчет стоимости может быть выполнен только для доставки по России']);
         }
 
         $zip = mb_ereg_replace('\D', '', $this->getAddress('zip'));
         if (empty($zip)) {
-            return array(array('rate' => null, 'comment' => 'Не указан почтовый индекс города доставки'));
+            return array(['rate' => null, 'comment' => 'Не указан почтовый индекс города доставки']);
         }
         if (mb_strlen($zip) != 6) {
-            return array(array('rate' => null, 'comment' => 'Неправильный почтовый индекс города доставки'));
+            return array(['rate' => null, 'comment' => 'Неправильный почтовый индекс города доставки']);
         }
 
         if (($this->zero_weight_item == 'stop') && $this->hasZeroWeightItems()) {
@@ -252,11 +261,11 @@ class nrgShipping extends waShipping
             return empty($msg) ? 'Недоступно' : $msg;
         }
 
-        $net = new waNet(array('format' => waNet::FORMAT_JSON, 'verify' => false));
+        $net = new waNet(['format' => waNet::FORMAT_JSON, 'verify' => false]);
         try {
             $target_city = $net->query('https://api2.nrg-tk.ru/v2/search/city?' . http_build_query(['zipCode' => $zip]));
         } catch (waException $e) {
-            return array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));
+            return array(['rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна']);
         }
 
         $warehouses = $this->getWarehouses($target_city['city']['id']);
@@ -276,20 +285,21 @@ class nrgShipping extends waShipping
         );
 
         try {
+            /** @var array $result */
             $result = $net->query('https://api2.nrg-tk.ru/v2/price', $request, waNet::METHOD_POST);
             if (empty($result['transfer'])) {
                 throw new waException();
             }
         } catch (waException $e) {
-            return array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));
+            return array(['rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна']);
         }
 
         $todoor = array();
         $ware = array();
 
         /** @var float $pickup_price стоимость доставки груза до склада ТК */
-        $pickup_price = $this->pickup_price == 'sender' ? ifempty($result['request']['price'], 0) : 0;
-        $pickup_price = floatval(str_replace(',', '.', $pickup_price));
+        $pickup_price = $this->pickup_price == 'sender' ? Hash::get($result, 'request.price', 0) : 0;
+        $pickup_price = WaShippingUtils::strToFloat($pickup_price);
 
         /** Оптимизатор "самый дешевый". Отсортируем по цене и оставим только первый */
         if ($this->optimize == 'cheapest') {
@@ -303,14 +313,15 @@ class nrgShipping extends waShipping
         }
 
         // Варианты доставки "до двери". Магистральный тариф плюс стоимость трансфера по городу плюс стоимость забора от отправителя
-        if (ifempty($result['delivery'], array()) && ($this->delivery_type != 'tostore')) {
+        if (Hash::get($result, 'delivery') && ($this->delivery_type != 'tostore')) {
             foreach ($result['transfer'] as $variant) {
                 $todoor['TODOOR-' . $variant['typeId']] = array(
                     'rate'         => $this->calcTotalCost($variant['price'] + $result['delivery']['price'] + $pickup_price),
                     'currency'     => 'RUB',
                     'name'         => $variant['type'] . '+до двери',
                     'comment'      => $variant['type'] . '-доставка и экспедирование по городу до адреса',
-                    'est_delivery' => $variant['interval']
+                    'est_delivery' => $variant['interval'],
+                    'type'         => waShipping::TYPE_TODOOR
                 );
             }
         }
@@ -319,12 +330,21 @@ class nrgShipping extends waShipping
         if ($this->delivery_type != 'todoor') {
             foreach ($warehouses as $w) {
                 foreach ($result['transfer'] as $t) {
-                    $ware['WRH-' . $w['id'] . '-' . $t['typeId']] = array(
+                    $id = 'WRH-' . $w['id'] . '-' . $t['typeId'];
+                    $ware[$id] = array(
                         'name'         => $w['title'] . ' / ' . $t['type'],
                         'rate'         => $this->calcTotalCost($t['price'] + $pickup_price),
                         'currency'     => 'RUB',
                         'comment'      => $w['address'] . '; ' . $w['phone'],
-                        'est_delivery' => $t['interval']
+                        'est_delivery' => $t['interval'],
+                        'type'         => waShipping::TYPE_PICKUP,
+                        'custom_data'  => ['pickup' => [
+                            'id'          => $id,
+                            'lat'         => $w['latitude'],
+                            'lng'         => $w['longitude'],
+                            'name'        => $w['title'] . ' (' . $t['type'] . ')',
+                            'description' => $w['address']
+                        ]]
                     );
                 }
             }
@@ -341,7 +361,7 @@ class nrgShipping extends waShipping
      */
     protected function getTotalWeight()
     {
-        $weight = floatval(str_replace(',', '.', parent::getTotalWeight()));
+        $weight = WaShippingUtils::strToFloat(parent::getTotalWeight());
 
         return $weight > 0 ? $weight : 0.1;
     }
@@ -373,23 +393,25 @@ class nrgShipping extends waShipping
             return array();
         }
 
-        return ifempty($city['warehouses'], array());
+        return (array)Hash::get($city, 'warehouses');
     }
 
     protected function hasZeroWeightItems()
     {
         $items = $this->getItems();
         $zero_weighted = array_filter($items, function ($item) {
-            return !array_key_exists('weight', $item) || (floatval(str_replace(',', '.', $item['weight'])) == 0);
+            return !array_key_exists('weight', $item) || (WaShippingUtils::strToFloat($item['weight']) == 0);
         });
 
         return count($zero_weighted) > 0;
     }
 
+    /**
+     * @see waShipping::init()
+     */
     protected function init()
     {
-        waAutoload::getInstance()->add('EvalMath', "wa-plugins/shipping/nrg/lib/vendors/evalmath.class.php");
-        waAutoload::getInstance()->add('EvalMathStack', "wa-plugins/shipping/nrg/lib/vendors/evalmath.class.php");
+        require_once 'vendors/autoload.php';
         parent::init();
     }
 
@@ -407,12 +429,12 @@ class nrgShipping extends waShipping
      */
     private function calcTotalCost($nrg_cost)
     {
-        $nrg_cost = floatval(str_replace(',', '.', $nrg_cost));
+        $nrg_cost = WaShippingUtils::strToFloat($nrg_cost);
         $percent_sign_pos = strpos($this->handling_cost, '%');
 
         // Если процентов нет, то и думать нечего. Приплюсуем и все дела
         if (($percent_sign_pos === false) && ($this->handling_base != 'formula')) {
-            return $this->roundPrice(floatval(str_replace(',', '.', $this->handling_cost)) + $nrg_cost);
+            return $this->roundPrice(WaShippingUtils::strToFloat($this->handling_cost) + $nrg_cost);
         }
 
         if ($this->handling_base == 'formula') {
@@ -500,7 +522,7 @@ class nrgShipping extends waShipping
         $package = null;
 
         foreach ($this->standard_parcel_dimensions as $rule) {
-            $min_weight = floatval(str_replace(',', '.', $rule['min_weight']));
+            $min_weight = WaShippingUtils::strToFloat($rule['min_weight']);
             if ($weight < $min_weight) {
                 break;
             }
@@ -521,7 +543,7 @@ class nrgShipping extends waShipping
         }
 
         array_walk($dimensions, function (&$d) {
-            $d = floatval(str_replace(',', '.', $d));
+            $d = WaShippingUtils::strToFloat($d);
             if ($d == 0) {
                 $d = 10;
             }
@@ -550,7 +572,7 @@ class nrgShipping extends waShipping
             return $price;
         }
 
-        $price = floatval(str_replace(',', '.', $price));
+        $price = WaShippingUtils::strToFloat($price);
         $rounding = floatval($this->rounding);
         $precision = intval(0 - log10($rounding));
         $rounded = round($price, $precision);

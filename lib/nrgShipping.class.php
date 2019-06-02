@@ -187,7 +187,7 @@ class nrgShipping extends waShipping
      * @param array $params
      * @return string
      */
-    public static function settingPackageSelect($name, $params = array())
+    public function settingPackageSelect($name, $params = array())
     {
         foreach ($params as $field => $param) {
             if (strpos($field, 'wrapper')) {
@@ -417,7 +417,7 @@ class nrgShipping extends waShipping
 
     protected function initControls()
     {
-        $this->registerControl('PackageSelect');
+        $this->registerControl('PackageSelect', [$this, 'settingPackageSelect']);
         parent::initControls();
     }
 

@@ -23,8 +23,6 @@ use Webit\Util\EvalMath\EvalMath;
  *
  * @property string $handling_base
  * @property string $handling_cost
- * @property string $rounding
- * @property string $rounding_type
  *
  * @property string $city_hide
  */
@@ -187,7 +185,7 @@ class nrgShipping extends waShipping
      * @param array $params
      * @return string
      */
-    public static function settingPackageSelect($name, $params = array())
+    public function settingPackageSelect($name, $params = array())
     {
         foreach ($params as $field => $param) {
             if (strpos($field, 'wrapper')) {
@@ -216,8 +214,14 @@ class nrgShipping extends waShipping
             }
         }
 
+        try {
+            $external_calc_support = $this->getAppDimensionSupport() === 'supported';
+        } catch (waException $e) {
+            $external_calc_support = false;
+        }
+
         $view = wa()->getView();
-        $view->assign(array('namespace' => $namespace, 'params' => $params));
+        $view->assign(compact('namespace', 'params', 'external_calc_support'));
 
         $control = $view->fetch(
             waConfig::get('wa_path_plugins') . '/shipping/nrg/templates/controls/package_select.html'
@@ -271,7 +275,7 @@ class nrgShipping extends waShipping
         $warehouses = $this->getWarehouses($target_city['city']['id']);
 
         try {
-            $dimensions = $this->getDimensions();
+            $dimensions = $this->getTotalSize();
         } catch (waException $e) {
             return array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));
         }
@@ -417,7 +421,7 @@ class nrgShipping extends waShipping
 
     protected function initControls()
     {
-        $this->registerControl('PackageSelect');
+        $this->registerControl('PackageSelect', [$this, 'settingPackageSelect']);
         parent::initControls();
     }
 
@@ -434,7 +438,7 @@ class nrgShipping extends waShipping
 
         // Если процентов нет, то и думать нечего. Приплюсуем и все дела
         if (($percent_sign_pos === false) && ($this->handling_base != 'formula')) {
-            return $this->roundPrice(WaShippingUtils::strToFloat($this->handling_cost) + $nrg_cost);
+            return round(WaShippingUtils::strToFloat($this->handling_cost) + $nrg_cost, 2);
         }
 
         if ($this->handling_base == 'formula') {
@@ -447,9 +451,9 @@ class nrgShipping extends waShipping
             $math_result = $EvalMath->evaluate($this->handling_cost);
             if ($math_result === false) {
                 self::log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $EvalMath->last_error . ')');
-                return $this->roundPrice($nrg_cost);
+                return round($nrg_cost, 2);
             }
-            return $this->roundPrice($math_result);
+            return round($math_result, 2);
         }
 
         switch ($this->handling_base) {
@@ -469,7 +473,7 @@ class nrgShipping extends waShipping
             return $nrg_cost;
         }
 
-        return $this->roundPrice($nrg_cost + $base * floatval($cost) / 100);
+        return round($nrg_cost + $base * floatval($cost) / 100, 2);
     }
 
     /**
@@ -507,11 +511,20 @@ class nrgShipping extends waShipping
      *  'width' => float,
      *  'height' => float
      * ]
-     * @return array
+     * @return array ['length'=>0.0, 'width'=>0.0, 'height'=>0.0]
      * @throws waException
      */
-    private function getDimensions()
+    protected function getTotalSize()
     {
+        if ($this->getAppDimensionSupport() === 'supported') {
+            $dimensions = parent::getTotalSize();
+            if (!is_array($dimensions)) {
+                throw new waException('Ошибочные размеры упаковки');
+            }
+
+            return $dimensions;
+        }
+
         if (!is_array($this->standard_parcel_dimensions)) {
             $this->standard_parcel_dimensions = array(
                 array('min_weight' => 0, 'package' => $this->standard_parcel_dimensions)
@@ -561,34 +574,20 @@ class nrgShipping extends waShipping
     }
 
     /**
-     * Округление по заданным в настройках правилам
-     *
-     * @param float|string $price
-     * @return float
+     * @return string
+     * @throws waException
      */
-    private function roundPrice($price)
+    private function getAppDimensionSupport()
     {
-        if ($this->rounding == '0.01') {
-            return $price;
+        $dims = $this->getAdapter()->getAppProperties('dimensions');
+
+        if ($dims === null) {
+            return 'not_supported';
+        } elseif ($dims === false) {
+            return 'not_set';
+        } elseif ($dims === true) {
+            return 'no_external';
         }
-
-        $price = WaShippingUtils::strToFloat($price);
-        $rounding = floatval($this->rounding);
-        $precision = intval(0 - log10($rounding));
-        $rounded = round($price, $precision);
-
-        if ($this->rounding_type == 'std') {
-            return $rounded;
-        }
-
-        if (($this->rounding_type == 'up') && ($price > $rounded)) {
-            return $rounded + $rounding;
-        }
-
-        if (($this->rounding_type == 'down') && ($rounded > $price)) {
-            return $rounded - $rounding;
-        }
-
-        return $rounded;
+        return 'supported';
     }
 }

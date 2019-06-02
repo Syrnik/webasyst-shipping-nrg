@@ -576,38 +576,6 @@ class nrgShipping extends waShipping
     }
 
     /**
-     * Округление по заданным в настройках правилам
-     *
-     * @param float|string $price
-     * @return float
-     */
-    private function roundPrice($price)
-    {
-        if ($this->rounding == '0.01') {
-            return $price;
-        }
-
-        $price = WaShippingUtils::strToFloat($price);
-        $rounding = floatval($this->rounding);
-        $precision = intval(0 - log10($rounding));
-        $rounded = round($price, $precision);
-
-        if ($this->rounding_type == 'std') {
-            return $rounded;
-        }
-
-        if (($this->rounding_type == 'up') && ($price > $rounded)) {
-            return $rounded + $rounding;
-        }
-
-        if (($this->rounding_type == 'down') && ($rounded > $price)) {
-            return $rounded - $rounding;
-        }
-
-        return $rounded;
-    }
-
-    /**
      * @return string
      * @throws waException
      */

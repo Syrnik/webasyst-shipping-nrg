@@ -216,8 +216,14 @@ class nrgShipping extends waShipping
             }
         }
 
+        try {
+            $external_calc_support = $this->getAppDimensionSupport() === 'supported';
+        } catch (waException $e) {
+            $external_calc_support = false;
+        }
+
         $view = wa()->getView();
-        $view->assign(array('namespace' => $namespace, 'params' => $params));
+        $view->assign(compact('namespace', 'params', 'external_calc_support'));
 
         $control = $view->fetch(
             waConfig::get('wa_path_plugins') . '/shipping/nrg/templates/controls/package_select.html'

@@ -23,8 +23,6 @@ use Webit\Util\EvalMath\EvalMath;
  *
  * @property string $handling_base
  * @property string $handling_cost
- * @property string $rounding
- * @property string $rounding_type
  *
  * @property string $city_hide
  */
@@ -440,7 +438,7 @@ class nrgShipping extends waShipping
 
         // Если процентов нет, то и думать нечего. Приплюсуем и все дела
         if (($percent_sign_pos === false) && ($this->handling_base != 'formula')) {
-            return $this->roundPrice(WaShippingUtils::strToFloat($this->handling_cost) + $nrg_cost);
+            return round(WaShippingUtils::strToFloat($this->handling_cost) + $nrg_cost, 2);
         }
 
         if ($this->handling_base == 'formula') {
@@ -453,9 +451,9 @@ class nrgShipping extends waShipping
             $math_result = $EvalMath->evaluate($this->handling_cost);
             if ($math_result === false) {
                 self::log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $EvalMath->last_error . ')');
-                return $this->roundPrice($nrg_cost);
+                return round($nrg_cost, 2);
             }
-            return $this->roundPrice($math_result);
+            return round($math_result, 2);
         }
 
         switch ($this->handling_base) {
@@ -475,7 +473,7 @@ class nrgShipping extends waShipping
             return $nrg_cost;
         }
 
-        return $this->roundPrice($nrg_cost + $base * floatval($cost) / 100);
+        return round($nrg_cost + $base * floatval($cost) / 100, 2);
     }
 
     /**
@@ -573,38 +571,6 @@ class nrgShipping extends waShipping
         if (waSystemConfig::isDebug() || $critical) {
             waLog::log($msg, 'shipping/nrg.log');
         }
-    }
-
-    /**
-     * Округление по заданным в настройках правилам
-     *
-     * @param float|string $price
-     * @return float
-     */
-    private function roundPrice($price)
-    {
-        if ($this->rounding == '0.01') {
-            return $price;
-        }
-
-        $price = WaShippingUtils::strToFloat($price);
-        $rounding = floatval($this->rounding);
-        $precision = intval(0 - log10($rounding));
-        $rounded = round($price, $precision);
-
-        if ($this->rounding_type == 'std') {
-            return $rounded;
-        }
-
-        if (($this->rounding_type == 'up') && ($price > $rounded)) {
-            return $rounded + $rounding;
-        }
-
-        if (($this->rounding_type == 'down') && ($rounded > $price)) {
-            return $rounded - $rounding;
-        }
-
-        return $rounded;
     }
 
     /**

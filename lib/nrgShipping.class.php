@@ -440,7 +440,7 @@ class nrgShipping extends waShipping
 
         // Если процентов нет, то и думать нечего. Приплюсуем и все дела
         if (($percent_sign_pos === false) && ($this->handling_base != 'formula')) {
-            return $this->roundPrice(WaShippingUtils::strToFloat($this->handling_cost) + $nrg_cost);
+            return round(WaShippingUtils::strToFloat($this->handling_cost) + $nrg_cost, 2);
         }
 
         if ($this->handling_base == 'formula') {
@@ -453,9 +453,9 @@ class nrgShipping extends waShipping
             $math_result = $EvalMath->evaluate($this->handling_cost);
             if ($math_result === false) {
                 self::log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $EvalMath->last_error . ')');
-                return $this->roundPrice($nrg_cost);
+                return round($nrg_cost, 2);
             }
-            return $this->roundPrice($math_result);
+            return round($math_result, 2);
         }
 
         switch ($this->handling_base) {
@@ -475,7 +475,7 @@ class nrgShipping extends waShipping
             return $nrg_cost;
         }
 
-        return $this->roundPrice($nrg_cost + $base * floatval($cost) / 100);
+        return round($nrg_cost + $base * floatval($cost) / 100, 2);
     }
 
     /**

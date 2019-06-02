@@ -1,3 +1,8 @@
+{if $external_calc_support}
+    <i><b>Настройка не требуется</b> <span class="hint">— плагин будет использовать габариты отправления, рассчитанные вашим приложением</span></i>
+    {foreach $params.value as $value}<input type="hidden" name="{$namespace|escape}[{$value@index}][min_weight]" value="{$value.min_weight|escape}">
+        <input type="hidden" name="{$namespace|escape}[{$value@index}][package]" value="{$value.package|escape}">{/foreach}
+{else}
 <div class="block padding" style="padding-left: 0" id="{$params.id}">
     <table class="zebra">
         <thead>
@@ -69,3 +74,4 @@
                 })
     });
 </script>
+{/if}

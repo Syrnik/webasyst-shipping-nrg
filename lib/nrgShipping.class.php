@@ -513,11 +513,20 @@ class nrgShipping extends waShipping
      *  'width' => float,
      *  'height' => float
      * ]
-     * @return array
+     * @return array ['length'=>0.0, 'width'=>0.0, 'height'=>0.0]
      * @throws waException
      */
     private function getDimensions()
     {
+        if ($this->getAppDimensionSupport() === 'supported') {
+            $dimensions = $this->getTotalSize();
+            if (!is_array($dimensions)) {
+                throw new waException('Ошибочные размеры упаковки');
+            }
+
+            return $dimensions;
+        }
+
         if (!is_array($this->standard_parcel_dimensions)) {
             $this->standard_parcel_dimensions = array(
                 array('min_weight' => 0, 'package' => $this->standard_parcel_dimensions)

@@ -23,8 +23,6 @@ use Webit\Util\EvalMath\EvalMath;
  *
  * @property string $handling_base
  * @property string $handling_cost
- * @property string $rounding
- * @property string $rounding_type
  *
  * @property string $city_hide
  */

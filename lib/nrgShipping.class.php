@@ -277,7 +277,7 @@ class nrgShipping extends waShipping
         $warehouses = $this->getWarehouses($target_city['city']['id']);
 
         try {
-            $dimensions = $this->getDimensions();
+            $dimensions = $this->getTotalSize();
         } catch (waException $e) {
             return array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));
         }
@@ -516,10 +516,10 @@ class nrgShipping extends waShipping
      * @return array ['length'=>0.0, 'width'=>0.0, 'height'=>0.0]
      * @throws waException
      */
-    private function getDimensions()
+    protected function getTotalSize()
     {
         if ($this->getAppDimensionSupport() === 'supported') {
-            $dimensions = $this->getTotalSize();
+            $dimensions = parent::getTotalSize();
             if (!is_array($dimensions)) {
                 throw new waException('Ошибочные размеры упаковки');
             }

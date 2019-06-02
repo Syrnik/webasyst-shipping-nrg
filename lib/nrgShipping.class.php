@@ -591,4 +591,22 @@ class nrgShipping extends waShipping
 
         return $rounded;
     }
+
+    /**
+     * @return string
+     * @throws waException
+     */
+    private function getAppDimensionSupport()
+    {
+        $dims = $this->getAdapter()->getAppProperties('dimensions');
+
+        if ($dims === null) {
+            return 'not_supported';
+        } elseif ($dims === false) {
+            return 'not_set';
+        } elseif ($dims === true) {
+            return 'no_external';
+        }
+        return 'supported';
+    }
 }

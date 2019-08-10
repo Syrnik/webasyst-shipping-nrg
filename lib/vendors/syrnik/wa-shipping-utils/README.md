@@ -70,3 +70,8 @@ public static function isBannedLocation($city_name, $region_code, $excluded)
 #### Возвращает
 
 `bool` Попадает город/регион в заданное условие или нет
+
+### `monetaryString(float $value) : string`
+
+Форматирует число в строку в "денежном" формате '0.00'
+ 

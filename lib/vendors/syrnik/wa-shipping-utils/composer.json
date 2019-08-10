@@ -1,6 +1,21 @@
 {
   "name": "syrnik/wa-shipping-utils",
-  "license": "propritery",
+  "description": "Набор статических методов для использования в плагинах расчёта стоимости доставки для Webasyst Framework",
+  "keywords": ["webasyst","shipping"],
+  "readme": "./README.md",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Serge Rodovnichenko",
+      "email": "serge@syrnik.com",
+      "role": "developer"
+    }
+  ],
+  "support": {
+    "email": "support@syrnik.com",
+    "source": "https://gitlab.com/sergerod/wa-shipping-utils",
+    "issues": "https://gitlab.com/sergerod/wa-shipping-utils/issues"
+  },
   "autoload": {
     "psr-4": {
       "Syrnik\\": "src/"

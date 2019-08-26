@@ -348,12 +348,12 @@ class nrgShipping extends waShipping
                 foreach ($result['transfer'] as $t) {
                     $id = 'WRH-' . $w['id'] . '-' . $t['typeId'];
                     $ware[$id] = array(
-                        'name'         => $w['title'] . ' / ' . $t['type'],
-                        'rate'         => $this->calcTotalCost($t['price'] + $pickup_price),
-                        'currency'     => 'RUB',
-                        'comment'      => $w['address'] . '; ' . $w['phone'],
-                        'type'         => waShipping::TYPE_PICKUP,
-                        'custom_data'  => ['pickup' => [
+                        'name'        => $w['title'] . ' / ' . $t['type'],
+                        'rate'        => $this->calcTotalCost($t['price'] + $pickup_price),
+                        'currency'    => 'RUB',
+                        'comment'     => $w['address'] . '; ' . $w['phone'],
+                        'type'        => waShipping::TYPE_PICKUP,
+                        'custom_data' => ['pickup' => [
                             'id'          => $id,
                             'lat'         => $w['latitude'],
                             'lng'         => $w['longitude'],
@@ -568,24 +568,20 @@ class nrgShipping extends waShipping
             throw new waException(sprintf("Не найдено подходящего размера упаковки для веса заказа %.3f кг.", $weight));
         }
 
-        $dimensions = explode('x', strtolower($package));
+        $_dimensions = (array)preg_split('/[хx*]/i', $package);
+        $dimensions['length'] = (string)Hash::get($_dimensions, '0', '20');
+        $dimensions['width'] = (string)Hash::get($_dimensions, '0', '20');
+        $dimensions['height'] = (string)Hash::get($_dimensions, '0', '20');
 
-        $items_cnt = count($dimensions);
-        if ($items_cnt > 3) {
-            $dimensions = array_slice($dimensions, 0, 3);
-        } elseif ($items_cnt < 3) {
-            $dimensions = array_fill($items_cnt - 1, 3 - $items_cnt, 20);
+        foreach ($dimensions as $key => $item) {
+            $dimensions[$key] = WaShippingUtils::strToFloat($item);
+            if (!$dimensions[$key]) {
+                $dimensions[$key] = 20;
+            }
+
         }
 
-        array_walk($dimensions, function (&$d) {
-            $d = WaShippingUtils::strToFloat($d);
-            if ($d == 0) {
-                $d = 10;
-            }
-            $d = $d / 100;
-        });
-
-        return array_combine(array('length', 'width', 'height'), $dimensions);
+        return $dimensions;
     }
 
     private static function log($msg, $critical = false)

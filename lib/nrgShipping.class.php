@@ -417,6 +417,9 @@ class nrgShipping extends waShipping
     {
         require_once 'vendors/autoload.php';
         parent::init();
+        waAutoload::getInstance()->add([
+            'Syrnik\\nrgShipping\\EstimatedDelivery' => "wa-plugins/shipping/nrg/lib/classes/EstimatedDelivery.class.php"
+        ]);
     }
 
     protected function initControls()

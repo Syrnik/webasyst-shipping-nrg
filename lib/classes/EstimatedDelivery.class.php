@@ -80,7 +80,7 @@ class EstimatedDelivery
 
         if (preg_match('/^(\d+)-?(\d+)?\s(день|дня|дней)/iu', $range, $matches)) {
             $_range[0] = (int)$matches[1];
-            $range[1] = (int)$matches[2];
+            $_range[1] = (int)$matches[2];
         } else {
             throw new waException('Ошибка разбора сроков доставки из строки: ' . $range);
         }

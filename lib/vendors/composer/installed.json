@@ -48,17 +48,17 @@
     },
     {
         "name": "syrnik/wa-shipping-utils",
-        "version": "v1.5.1",
-        "version_normalized": "1.5.1.0",
+        "version": "v1.6.1",
+        "version_normalized": "1.6.1.0",
         "source": {
             "type": "git",
-            "url": "git@gitlab.com:sergerod/wa-shipping-utils.git",
-            "reference": "a55225f17989908c746349c9d26e9d8cb638e2ba"
+            "url": "https://gitlab.com/sergerod/wa-shipping-utils.git",
+            "reference": "a0851a990693d9fd5b36617c93c6b5eb07af930e"
         },
         "dist": {
             "type": "zip",
-            "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=a55225f17989908c746349c9d26e9d8cb638e2ba",
-            "reference": "a55225f17989908c746349c9d26e9d8cb638e2ba",
+            "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=a0851a990693d9fd5b36617c93c6b5eb07af930e",
+            "reference": "a0851a990693d9fd5b36617c93c6b5eb07af930e",
             "shasum": ""
         },
         "require": {
@@ -66,7 +66,7 @@
             "php": "^5.6",
             "webit/eval-math": "1.*"
         },
-        "time": "2019-04-05T00:26:46+00:00",
+        "time": "2019-07-25T10:21:06+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
@@ -75,8 +75,25 @@
             }
         },
         "license": [
-            "propritery"
-        ]
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "Serge Rodovnichenko",
+                "email": "serge@syrnik.com",
+                "role": "developer"
+            }
+        ],
+        "description": "Набор статических методов для использования в плагинах расчёта стоимости доставки для Webasyst Framework",
+        "keywords": [
+            "shipping",
+            "webasyst"
+        ],
+        "support": {
+            "email": "support@syrnik.com",
+            "source": "https://gitlab.com/sergerod/wa-shipping-utils",
+            "issues": "https://gitlab.com/sergerod/wa-shipping-utils/issues"
+        }
     },
     {
         "name": "webit/eval-math",

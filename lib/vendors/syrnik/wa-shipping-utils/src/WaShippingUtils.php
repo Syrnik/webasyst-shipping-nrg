@@ -302,8 +302,8 @@ class WaShippingUtils
             return $price;
         }
 
-        $price = (float)str_replace(',', '.', $price);
-        $rounding = (float)str_replace(',', '.', $rounding);
+        $price = static::strToFloat($price);
+        $rounding = static::strToFloat($rounding);
         $precision = (int)(0 - log10($rounding));
         $rounded = round($price, $precision);
 
@@ -329,5 +329,16 @@ class WaShippingUtils
     public static function strToFloat($str)
     {
         return (float)str_replace(',', '.', self::mb_trim($str));
+    }
+
+    /**
+     * Возвращает строку с отформатированную как денежный формат (два знака после десятичного разделителя)
+     *
+     * @param float $value
+     * @return string
+     */
+    public static function monetaryString($value)
+    {
+        return number_format($value, 2, '.', '');
     }
 }

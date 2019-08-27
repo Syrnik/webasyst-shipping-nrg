@@ -6,6 +6,7 @@
  */
 
 use SergeR\CakeUtility\Hash;
+use Syrnik\nrgShipping\EstimatedDelivery;
 use Syrnik\WaShippingUtils;
 use Webit\Util\EvalMath\EvalMath;
 
@@ -316,17 +317,28 @@ class nrgShipping extends waShipping
             array_splice($result['transfer'], 1);
         }
 
+        $estimated_delivery = (new EstimatedDelivery())->setDepartureString($this->getPackageProperty('departure_datetime'));
+
         // Варианты доставки "до двери". Магистральный тариф плюс стоимость трансфера по городу плюс стоимость забора от отправителя
         if (Hash::get($result, 'delivery') && ($this->delivery_type != 'tostore')) {
             foreach ($result['transfer'] as $variant) {
-                $todoor['TODOOR-' . $variant['typeId']] = array(
-                    'rate'         => $this->calcTotalCost($variant['price'] + $result['delivery']['price'] + $pickup_price),
-                    'currency'     => 'RUB',
-                    'name'         => $variant['type'] . '+до двери',
-                    'comment'      => $variant['type'] . '-доставка и экспедирование по городу до адреса',
-                    'est_delivery' => $variant['interval'],
-                    'type'         => waShipping::TYPE_TODOOR
+                $id = 'TODOOR-' . $variant['typeId'];
+
+                $todoor[$id] = array(
+                    'rate'     => $this->calcTotalCost($variant['price'] + $result['delivery']['price'] + $pickup_price),
+                    'currency' => 'RUB',
+                    'name'     => $variant['type'] . '+до двери',
+                    'comment'  => $variant['type'] . '-доставка и экспедирование по городу до адреса',
+                    'type'     => waShipping::TYPE_TODOOR
                 );
+
+                try {
+                    $estimated_delivery->parseRegexRange((string)Hash::get($variant, 'interval'));
+                    $todoor[$id]['est_delivery'] = $estimated_delivery->getWebasystEstDelivery();
+                    $todoor[$id]['delivery_date'] = $estimated_delivery->getWebasystDeliveryDates();
+                } catch (Exception $e) {
+                    //todo log
+                }
             }
         }
 
@@ -336,13 +348,12 @@ class nrgShipping extends waShipping
                 foreach ($result['transfer'] as $t) {
                     $id = 'WRH-' . $w['id'] . '-' . $t['typeId'];
                     $ware[$id] = array(
-                        'name'         => $w['title'] . ' / ' . $t['type'],
-                        'rate'         => $this->calcTotalCost($t['price'] + $pickup_price),
-                        'currency'     => 'RUB',
-                        'comment'      => $w['address'] . '; ' . $w['phone'],
-                        'est_delivery' => $t['interval'],
-                        'type'         => waShipping::TYPE_PICKUP,
-                        'custom_data'  => ['pickup' => [
+                        'name'        => $w['title'] . ' / ' . $t['type'],
+                        'rate'        => $this->calcTotalCost($t['price'] + $pickup_price),
+                        'currency'    => 'RUB',
+                        'comment'     => $w['address'] . '; ' . $w['phone'],
+                        'type'        => waShipping::TYPE_PICKUP,
+                        'custom_data' => ['pickup' => [
                             'id'          => $id,
                             'lat'         => $w['latitude'],
                             'lng'         => $w['longitude'],
@@ -350,6 +361,14 @@ class nrgShipping extends waShipping
                             'description' => $w['address']
                         ]]
                     );
+
+                    try {
+                        $estimated_delivery->parseRegexRange((string)Hash::get($t, 'interval'));
+                        $ware[$id]['est_delivery'] = $estimated_delivery->getWebasystEstDelivery();
+                        $ware[$id]['delivery_date'] = $estimated_delivery->getWebasystDeliveryDates();
+                    } catch (Exception $e) {
+                        //todo log
+                    }
                 }
             }
         }
@@ -417,6 +436,9 @@ class nrgShipping extends waShipping
     {
         require_once 'vendors/autoload.php';
         parent::init();
+        waAutoload::getInstance()->add([
+            'Syrnik\\nrgShipping\\EstimatedDelivery' => "wa-plugins/shipping/nrg/lib/classes/EstimatedDelivery.class.php"
+        ]);
     }
 
     protected function initControls()
@@ -546,24 +568,20 @@ class nrgShipping extends waShipping
             throw new waException(sprintf("Не найдено подходящего размера упаковки для веса заказа %.3f кг.", $weight));
         }
 
-        $dimensions = explode('x', strtolower($package));
+        $_dimensions = (array)preg_split('/[хx*]/i', $package);
+        $dimensions['length'] = (string)Hash::get($_dimensions, '0', '20');
+        $dimensions['width'] = (string)Hash::get($_dimensions, '0', '20');
+        $dimensions['height'] = (string)Hash::get($_dimensions, '0', '20');
 
-        $items_cnt = count($dimensions);
-        if ($items_cnt > 3) {
-            $dimensions = array_slice($dimensions, 0, 3);
-        } elseif ($items_cnt < 3) {
-            $dimensions = array_fill($items_cnt - 1, 3 - $items_cnt, 20);
+        foreach ($dimensions as $key => $item) {
+            $dimensions[$key] = WaShippingUtils::strToFloat($item);
+            if (!$dimensions[$key]) {
+                $dimensions[$key] = 20;
+            }
+
         }
 
-        array_walk($dimensions, function (&$d) {
-            $d = WaShippingUtils::strToFloat($d);
-            if ($d == 0) {
-                $d = 10;
-            }
-            $d = $d / 100;
-        });
-
-        return array_combine(array('length', 'width', 'height'), $dimensions);
+        return $dimensions;
     }
 
     private static function log($msg, $critical = false)

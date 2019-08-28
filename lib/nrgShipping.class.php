@@ -54,6 +54,14 @@ class nrgShipping extends waShipping
         return 'kg';
     }
 
+    /**
+     * @return string
+     */
+    public function allowedLinearUnit()
+    {
+        return 'cm';
+    }
+
     public function getSettingsHTML($params = array())
     {
         $view = wa()->getView();

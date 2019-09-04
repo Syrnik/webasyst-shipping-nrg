@@ -59,7 +59,7 @@ class nrgShipping extends waShipping
      */
     public function allowedLinearUnit()
     {
-        return 'cm';
+        return 'm';
     }
 
     public function getSettingsHTML($params = array())
@@ -586,6 +586,8 @@ class nrgShipping extends waShipping
             if (!$dimensions[$key]) {
                 $dimensions[$key] = 20;
             }
+
+            $dimensions[$key] = $dimensions[$key] / 100;
 
         }
 

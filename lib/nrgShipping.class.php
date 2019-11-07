@@ -480,7 +480,7 @@ class nrgShipping extends waShipping
 
             $math_result = $EvalMath->evaluate($this->handling_cost);
             if ($math_result === false) {
-                self::log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $EvalMath->last_error . ')');
+                self::_log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $EvalMath->last_error . ')');
                 return round($nrg_cost, 2);
             }
             return round($math_result, 2);
@@ -594,7 +594,7 @@ class nrgShipping extends waShipping
         return $dimensions;
     }
 
-    private static function log($msg, $critical = false)
+    private static function _log($msg, $critical = false)
     {
         if (waSystemConfig::isDebug() || $critical) {
             waLog::log($msg, 'shipping/nrg.log');

@@ -11,13 +11,15 @@ use DateInterval;
 use DateTime;
 use DateTimeInterface;
 use Exception;
+use SergeR\Util\EvalMath\Exception\AbstractEvalMathException;
 use Syrnik\WaShippingUtils\CalcTotalCostException;
+use SergeR\Util\EvalMath\EvalMath;
 
 class WaShippingUtils
 {
     public static function replaceYo($str)
     {
-        return preg_replace('/ё/ui', 'е', $str);
+        return preg_replace(['/ё/u', '/Ё/u'], ['е', 'Е'], $str);
     }
 
     /**
@@ -59,7 +61,7 @@ class WaShippingUtils
 
         if (isset($params['start_day'])) {
             $start_day = $params['start_day'];
-            if ($day instanceof DateTimeInterface) {
+            if ($start_day instanceof DateTimeInterface) {
                 $day = new DateTime($start_day->getTimestamp());
             } elseif (is_string($start_day)) {
                 $day = new DateTime($start_day);
@@ -154,7 +156,7 @@ class WaShippingUtils
             $rules = $_rules[$key];
         } else {
             $rules = array_filter(array_map(function ($v) {
-                return self::mb_trim($v);
+                return mb_strtolower(self::mb_trim($v));
             }, explode(';', $excluded)));
 
             // это странно, но после отсеивания пустых правил не оказалось. Это может случиться
@@ -211,15 +213,15 @@ class WaShippingUtils
     /**
      * Расчет наценки на исходную цену с учетом бесплатной доставки
      *
-     * @todo Надо вообще все перевести в формулы
      * @param float $carrier_cost Сколько насчитал перевозчик
      * @param float $total_price Стоимость заказа с учетом скидок
      * @param float $total_raw_price Стоимость заказа без скидок
      * @param string $handling_cost Наценка
      * @param string $handling_base База для расчета наценки
      * @param string $free Порог бесплатной доствки
-     * @throws CalcTotalCostException
      * @return float
+     * @throws CalcTotalCostException
+     * @todo Надо вообще все перевести в формулы
      */
     public static function calcTotalCost($carrier_cost, $total_price = 0.0, $total_raw_price = 0.0, $handling_cost = '0', $handling_base = 'shipping', $free = '')
     {
@@ -249,18 +251,15 @@ class WaShippingUtils
         }
 
         if ($handling_base == 'formula') {
-            $EvalMath = new \Webit\Util\EvalMath\EvalMath;
-            $EvalMath->suppress_errors = 1;
+            $EvalMath = new EvalMath;
 
-            $EvalMath->evaluate('z=' . str_replace(',', '.', (string)$total_price));
-            $EvalMath->evaluate('y=' . str_replace(',', '.', (string)$total_raw_price));
-            $EvalMath->evaluate('s=' . str_replace(',', '.', (string)$carrier_cost));
-
-            $math_result = $EvalMath->evaluate($handling_cost);
-            if ($math_result === false) {
-                throw (new CalcTotalCostException($EvalMath->last_error))
-                    ->setFormula($handling_cost)
-                    ->setFormulaVars($EvalMath->vars());
+            try {
+                $EvalMath->evaluate('z=' . str_replace(',', '.', (string)$total_price));
+                $EvalMath->evaluate('y=' . str_replace(',', '.', (string)$total_raw_price));
+                $EvalMath->evaluate('s=' . str_replace(',', '.', (string)$carrier_cost));
+                $math_result = $EvalMath->evaluate($handling_cost);
+            } catch (AbstractEvalMathException $e) {
+                throw (new CalcTotalCostException($e->getMessage()))->setFormula($handling_cost)->setFormulaVars($EvalMath->vars());
             }
             return round($math_result, 2);
         }
@@ -298,10 +297,6 @@ class WaShippingUtils
      */
     public static function roundPrice($price, $rounding = '0.01', $rounding_type = 'std')
     {
-        if ($rounding == '0.01') {
-            return $price;
-        }
-
         $price = static::strToFloat($price);
         $rounding = static::strToFloat($rounding);
         $precision = (int)(0 - log10($rounding));
@@ -340,5 +335,25 @@ class WaShippingUtils
     public static function monetaryString($value)
     {
         return number_format($value, 2, '.', '');
+    }
+
+    /**
+     * @param $value
+     * @param array $castings
+     * @return bool
+     */
+    public static function toBool($value, array $castings = ['true' => ['yes', 'да', 'on', 'вкл', 'true', 'истина'], 'false' => ['no', 'нет', 'off', 'выкл', 'false', 'ложь']])
+    {
+        if (is_string($value)) {
+            $value = mb_strtolower($value, 'UTF-8');
+        }
+        if (in_array($value, $castings['true'], true)) {
+            return true;
+        }
+        if (in_array($value, $castings['false'], true)) {
+            return false;
+        }
+
+        return (bool)$value;
     }
 }

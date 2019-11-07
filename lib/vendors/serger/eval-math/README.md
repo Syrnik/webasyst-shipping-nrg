@@ -1,3 +1,6 @@
+[![Build Status](https://travis-ci.org/SergeR/eval-math.svg?branch=master)](https://travis-ci.org/SergeR/eval-math)
+[![Coverage Status](https://coveralls.io/repos/github/SergeR/eval-math/badge.svg?branch=master)](https://coveralls.io/github/SergeR/eval-math?branch=master)
+
 Composer/Packagist version of EvalMath by Miles Kaufman
 Copyright (C) 2005 Miles Kaufmann <http://www.twmagic.com/>
 NAME
@@ -28,6 +31,10 @@ SYNOPSIS
     
     `// and then use them`
     `$result = $m->evaluate('3*f(42,a)');`
+    
+    `// use methods (calc functions)
+    `$m->evaluate('1+max(2,3)') // => 4`
+    `$m->evaluate('if(1=2, 2+2, 5+5') // => 10
 
 METHODS
 -------
@@ -44,12 +51,29 @@ METHODS
         
     `$m->funcs()`
         Returns an array of all user-defined functions.
+        
+CALC METHODS (CALC FUNCTIONS)
+-----------------------------
 
-PARAMETERS
-----------
-    `$m->suppress_errors`
-        Set to true to turn off warnings when evaluating expressions
+- `max(n...,m)` returns one of given arguments with maximal value
+- `min(n...,m)` returns one of given arguments with minimal value
+- `if(expr, true_value, false_value)` (has a `iif` synonym) returns `true_value` of `false_value` depends of `expr` evaluation result
 
-    `$m->last_error`
-        If the last evaluation failed, contains a string describing the error.
-        (Useful when suppress_errors is on).
+CREATE YOUR OWN CUSTOM CALC METHODS (CALC FUNCTIONS)
+-----------------------------------------------
+    You can create custom classes, that implements custom calc methods.
+    
+TODO
+----
+- Improve documentation
+- Ability to add custom operators
+- More tests
+
+CREDITS AND COPYRIGHTS
+----------------------
+This software integrates several libraries and patches by:
+
+- Original EvalMath library, (C) 2005 Miles Kaufmann <http://www.twmagic.com/>
+- Modifications for 'calc functions' by Moodle, <https://github.com/moodle/moodle>
+- Composer/Packagist version, (C) Daniel Bojdo, <https://github.com/dbojdo>
+   

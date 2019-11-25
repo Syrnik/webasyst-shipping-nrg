@@ -1,0 +1,158 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "c50938e995133b557946984a385527f9",
+    "packages": [
+        {
+            "name": "serger/cake-utility",
+            "version": "v1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SergeR/cake-utils.git",
+                "reference": "c7d6554c08f1d93be9f3f4b1c5cae10733558d42"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SergeR/cake-utils/zipball/c7d6554c08f1d93be9f3f4b1c5cae10733558d42",
+                "reference": "c7d6554c08f1d93be9f3f4b1c5cae10733558d42",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "suggest": {
+                "ext-intl": "To use Text::transliterate() or Text::slug()",
+                "lib-ICU": "To use Text::transliterate() or Text::slug()"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SergeR\\CakeUtility\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "CakePHP Community",
+                    "homepage": "https://github.com/cakephp/utility/graphs/contributors"
+                }
+            ],
+            "description": "CakePHP 3.x Utility classes such as Inflector, String, and Hash without Cake/Core dependency",
+            "keywords": [
+                "hash",
+                "inflector",
+                "string"
+            ],
+            "time": "2019-04-04T22:17:46+00:00"
+        },
+        {
+            "name": "serger/eval-math",
+            "version": "v2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SergeR/eval-math.git",
+                "reference": "de67b2209615bab91590aac1f462f0095af9c4aa"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SergeR/eval-math/zipball/de67b2209615bab91590aac1f462f0095af9c4aa",
+                "reference": "de67b2209615bab91590aac1f462f0095af9c4aa",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6 || ^7"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2",
+                "phpunit/phpunit": "^5"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "SergeR\\Util\\EvalMath\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD"
+            ],
+            "description": "EvalMath",
+            "keywords": [
+                "EvalMath"
+            ],
+            "time": "2019-09-23T14:18:21+00:00"
+        },
+        {
+            "name": "syrnik/wa-shipping-utils",
+            "version": "v1.8.2",
+            "source": {
+                "type": "git",
+                "url": "https://gitlab.com/sergerod/wa-shipping-utils.git",
+                "reference": "7da81cf97be95c91a4d2cdc48893699a9d6b0d00"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=7da81cf97be95c91a4d2cdc48893699a9d6b0d00",
+                "reference": "7da81cf97be95c91a4d2cdc48893699a9d6b0d00",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": "^5.6 || ^7",
+                "serger/eval-math": "^2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Syrnik\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Serge Rodovnichenko",
+                    "email": "serge@syrnik.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "Набор статических методов для использования в плагинах расчёта стоимости доставки для Webasyst Framework",
+            "keywords": [
+                "shipping",
+                "webasyst"
+            ],
+            "support": {
+                "email": "support@syrnik.com",
+                "source": "https://gitlab.com/sergerod/wa-shipping-utils",
+                "issues": "https://gitlab.com/sergerod/wa-shipping-utils/issues"
+            },
+            "time": "2019-10-18T07:52:48+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": [],
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": [],
+    "platform-dev": [],
+    "platform-overrides": {
+        "php": "5.6.0"
+    }
+}

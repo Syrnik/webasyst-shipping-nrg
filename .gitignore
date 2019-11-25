@@ -1,3 +1,2 @@
 .test_results
 *.tar.gz
-composer.lock

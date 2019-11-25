@@ -7,25 +7,22 @@ namespace Composer\Autoload;
 class ComposerStaticInit4d0c7bed7569f16832aad3db9cc55c88
 {
     public static $prefixLengthsPsr4 = array (
-        'W' => 
-        array (
-            'Webit\\Util\\EvalMath\\' => 20,
-        ),
         'S' => 
         array (
             'Syrnik\\' => 7,
+            'SergeR\\Util\\EvalMath\\' => 21,
             'SergeR\\CakeUtility\\' => 19,
         ),
     );
 
     public static $prefixDirsPsr4 = array (
-        'Webit\\Util\\EvalMath\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/webit/eval-math/src',
-        ),
         'Syrnik\\' => 
         array (
             0 => __DIR__ . '/..' . '/syrnik/wa-shipping-utils/src',
+        ),
+        'SergeR\\Util\\EvalMath\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/serger/eval-math/src',
         ),
         'SergeR\\CakeUtility\\' => 
         array (

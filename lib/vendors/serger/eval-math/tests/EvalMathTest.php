@@ -7,11 +7,12 @@
  * Copyright (C) 8x8
  */
 
-namespace Webit\Util\EvalMath\Tests;
+namespace SergeR\Util\EvalMath\Tests;
 
-use Webit\Util\EvalMath\EvalMath;
+use PHPUnit\Framework\TestCase;
+use SergeR\Util\EvalMath\EvalMath;
 
-class EvalMathTest extends \PHPUnit_Framework_TestCase
+class EvalMathTest extends TestCase
 {
     /**
      * @var EvalMath
@@ -97,5 +98,43 @@ class EvalMathTest extends \PHPUnit_Framework_TestCase
                 3
             )
         );
+    }
+
+    /**
+     * @dataProvider maximumsData
+     */
+    public function testMaxCalcFunction($formula, $expected)
+    {
+        $this->assertEquals($expected, $this->evalMath->e($formula));
+    }
+
+    public function maximumsData()
+    {
+        return [
+            ['max(1,2,3,4,5)', 5],
+            ['max(5,2,3,1,4)', 5],
+            ['max(5)', 5],
+            ['max(5,5)', 5]
+        ];
+    }
+
+    /**
+     * @dataProvider comparisonsData
+     */
+    public function testComparisonOperators($formula, $expected)
+    {
+        $this->assertEquals($expected, $this->evalMath->e($formula));
+    }
+
+    public function comparisonsData()
+    {
+        return [
+            ['1==1', 1],
+            ['1==2', 0],
+            ['1>2', 0],
+            ['1<2', 1],
+            ['1>=1', 1],
+            ['1<=2', 1]
+        ];
     }
 }

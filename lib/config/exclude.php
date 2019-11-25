@@ -1,10 +1,8 @@
 <?php
 return array(
-    './README.md',
     'README.md',
-    './CHANGELOG.md',
-    './CONTRIBUTING.md',
-    './LICENSE',
+    'CHANGELOG.md',
+    'CONTRIBUTING.md',
     'contributors.txt',
     'img/screenshot_*',
     'img/screenshot-*',
@@ -31,5 +29,9 @@ return array(
     '.git',
     'composer.json',
     'composer.lock',
-    'lib/vendors/bin'
+    '.travis.yml',
+    '.gitlab-ci.yml',
+    'lib/vendors/*/ci-gitlab/*',
+    'lib/vendors/bin',
+    'lib/vendors/jms/metadata/tests/Metadata/Tests'
 );

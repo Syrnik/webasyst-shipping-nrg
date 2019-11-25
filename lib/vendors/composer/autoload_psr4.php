@@ -6,7 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname(dirname($vendorDir));
 
 return array(
-    'Webit\\Util\\EvalMath\\' => array($vendorDir . '/webit/eval-math/src'),
     'Syrnik\\' => array($vendorDir . '/syrnik/wa-shipping-utils/src'),
+    'SergeR\\Util\\EvalMath\\' => array($vendorDir . '/serger/eval-math/src'),
     'SergeR\\CakeUtility\\' => array($vendorDir . '/serger/cake-utility/src'),
 );

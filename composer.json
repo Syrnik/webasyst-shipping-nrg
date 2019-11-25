@@ -22,7 +22,7 @@
   ],
   "require": {
     "syrnik/wa-shipping-utils": "^1.5",
-    "webit/eval-math": "^1.0",
-    "serger/cake-utility": "^1"
+    "serger/cake-utility": "^1",
+    "serger/eval-math": "^2"
   }
 }

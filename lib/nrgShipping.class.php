@@ -8,7 +8,7 @@
 use SergeR\CakeUtility\Hash;
 use Syrnik\nrgShipping\EstimatedDelivery;
 use Syrnik\WaShippingUtils;
-use Webit\Util\EvalMath\EvalMath;
+use SergeR\Util\EvalMath;
 
 /**
  * @property string $delivery_type
@@ -472,17 +472,17 @@ class nrgShipping extends waShipping
         }
 
         if ($this->handling_base == 'formula') {
-            $EvalMath = new EvalMath();
-            $EvalMath->suppress_errors = 1;
+            $EvalMath = new EvalMath\EvalMath();
 
-            $EvalMath->evaluate('z=' . str_replace(',', '.', (string)$this->getTotalPrice()));
-            $EvalMath->evaluate('s=' . str_replace(',', '.', (string)$nrg_cost));
-
-            $math_result = $EvalMath->evaluate($this->handling_cost);
-            if ($math_result === false) {
-                self::log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $EvalMath->last_error . ')');
+            try {
+                $EvalMath->evaluate('z=' . str_replace(',', '.', (string)$this->getTotalPrice()));
+                $EvalMath->evaluate('s=' . str_replace(',', '.', (string)$nrg_cost));
+                $math_result = $EvalMath->evaluate($this->handling_cost);
+            } catch (EvalMath\Exception\AbstractEvalMathException $e) {
+                self::_log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $e->getMessage() . ')');
                 return round($nrg_cost, 2);
             }
+
             return round($math_result, 2);
         }
 
@@ -594,7 +594,7 @@ class nrgShipping extends waShipping
         return $dimensions;
     }
 
-    private static function log($msg, $critical = false)
+    private static function _log($msg, $critical = false)
     {
         if (waSystemConfig::isDebug() || $critical) {
             waLog::log($msg, 'shipping/nrg.log');

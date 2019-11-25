@@ -95,16 +95,16 @@
         },
         {
             "name": "syrnik/wa-shipping-utils",
-            "version": "v1.8.2",
+            "version": "v1.9.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/sergerod/wa-shipping-utils.git",
-                "reference": "7da81cf97be95c91a4d2cdc48893699a9d6b0d00"
+                "reference": "4c8433dc259a51a82fe36d8569bc505f15a23291"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=7da81cf97be95c91a4d2cdc48893699a9d6b0d00",
-                "reference": "7da81cf97be95c91a4d2cdc48893699a9d6b0d00",
+                "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=4c8433dc259a51a82fe36d8569bc505f15a23291",
+                "reference": "4c8433dc259a51a82fe36d8569bc505f15a23291",
                 "shasum": ""
             },
             "require": {
@@ -141,7 +141,7 @@
                 "source": "https://gitlab.com/sergerod/wa-shipping-utils",
                 "issues": "https://gitlab.com/sergerod/wa-shipping-utils/issues"
             },
-            "time": "2019-10-18T07:52:48+00:00"
+            "time": "2019-11-24T19:26:35+00:00"
         }
     ],
     "packages-dev": [],

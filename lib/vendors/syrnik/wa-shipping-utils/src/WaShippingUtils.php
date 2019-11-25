@@ -62,7 +62,7 @@ class WaShippingUtils
         if (isset($params['start_day'])) {
             $start_day = $params['start_day'];
             if ($start_day instanceof DateTimeInterface) {
-                $day = new DateTime($start_day->getTimestamp());
+                $day = new DateTime($start_day->format('Y-m-d H:i:s'));
             } elseif (is_string($start_day)) {
                 $day = new DateTime($start_day);
             }
@@ -355,5 +355,41 @@ class WaShippingUtils
         }
 
         return (bool)$value;
+    }
+
+    /**
+     * @param string|array|\ArrayAccess $delivery
+     * @param null|string $plugin_id
+     * @return object
+     */
+    public static function extractShippingVariantAndPlugin($delivery, $plugin_id = null)
+    {
+        $result = ['plugin' => '', 'variant' => '', 'error' => true];
+
+        if (is_array($delivery) or (is_object($delivery) and $delivery instanceof \ArrayAccess)) {
+            $plugin = isset($delivery['shipping_plugin']) ? $delivery['shipping_plugin'] : null;
+            $variant_id = isset($delivery['shipping_rate_id']) ? $delivery['shipping_rate_id'] : null;
+
+            if ((!$plugin || !$variant_id) && isset($delivery['params']) && is_array($delivery['params'])) {
+                $delivery = $delivery['params'];
+                $plugin = isset($delivery['shipping_plugin']) ? $delivery['shipping_plugin'] : null;
+                $variant_id = isset($delivery['shipping_rate_id']) ? $delivery['shipping_rate_id'] : null;
+            }
+
+            if ($plugin && $variant_id) {
+                $result['plugin'] = $plugin;
+                $result['variant'] = $variant_id;
+                $result['error'] = false;
+            }
+            if ($plugin_id && $plugin != $plugin_id) {
+                $result['error'] = true;
+            }
+        } else {
+            $result['plugin'] = $plugin_id;
+            $result['variant'] = $delivery;
+            $result['error'] = false;
+        }
+
+        return (object)$result;
     }
 }

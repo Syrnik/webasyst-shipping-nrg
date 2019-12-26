@@ -92,17 +92,17 @@
     },
     {
         "name": "syrnik/wa-shipping-utils",
-        "version": "v1.9.0",
-        "version_normalized": "1.9.0.0",
+        "version": "v1.9.1",
+        "version_normalized": "1.9.1.0",
         "source": {
             "type": "git",
             "url": "https://gitlab.com/sergerod/wa-shipping-utils.git",
-            "reference": "4c8433dc259a51a82fe36d8569bc505f15a23291"
+            "reference": "9419b61eb822bebfb68ef0c1bc199038b5f05457"
         },
         "dist": {
             "type": "zip",
-            "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=4c8433dc259a51a82fe36d8569bc505f15a23291",
-            "reference": "4c8433dc259a51a82fe36d8569bc505f15a23291",
+            "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=9419b61eb822bebfb68ef0c1bc199038b5f05457",
+            "reference": "9419b61eb822bebfb68ef0c1bc199038b5f05457",
             "shasum": ""
         },
         "require": {
@@ -113,7 +113,7 @@
         "require-dev": {
             "phpunit/phpunit": "^5"
         },
-        "time": "2019-11-24T19:26:35+00:00",
+        "time": "2019-11-30T15:31:16+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {

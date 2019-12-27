@@ -294,6 +294,7 @@ class nrgShipping extends waShipping
             'idCityTo'   => intval($target_city['city']['id']),
             'cover'      => 0,
             'idCurrency' => 1,
+            'places'     => 1,
             'items'      => array(array('weight' => $this->getTotalWeight()) + $dimensions)
         );
 
@@ -578,8 +579,8 @@ class nrgShipping extends waShipping
 
         $_dimensions = (array)preg_split('/[хx*]/i', $package);
         $dimensions['length'] = (string)Hash::get($_dimensions, '0', '20');
-        $dimensions['width'] = (string)Hash::get($_dimensions, '0', '20');
-        $dimensions['height'] = (string)Hash::get($_dimensions, '0', '20');
+        $dimensions['width'] = (string)Hash::get($_dimensions, '1', '20');
+        $dimensions['height'] = (string)Hash::get($_dimensions, '2', '20');
 
         foreach ($dimensions as $key => $item) {
             $dimensions[$key] = WaShippingUtils::strToFloat($item);

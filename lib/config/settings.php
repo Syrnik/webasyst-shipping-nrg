@@ -86,6 +86,22 @@ return array(
         'control_type' => 'PackageSelect',
         'subject'      => 'main'
     ),
+    'free_delivery_door'         => array(
+        'title'        => 'Бесплатная доставка до двери, от',
+        'description'  => 'Сумма заказа, при которой стоимость доставки «до двери» становится бесплатной. Оставьте поле пустым, если бесплатной доставки нет. Поставьте «0» если доставка всегда бесплатная',
+        'control_type' => waHtmlControl::INPUT,
+        'class'        => 'short numerical',
+        'value'        => '',
+        'subject'      => 'main'
+    ),
+    'free_delivery_terminal'     => array(
+        'title'        => 'Бесплатная доставка до терминала, от',
+        'description'  => 'Сумма заказа, при которой стоимость доставки «до терминала» становится бесплатной. Оставьте поле пустым, если бесплатной доставки нет. Поставьте «0» если доставка всегда бесплатная',
+        'control_type' => waHtmlControl::INPUT,
+        'class'        => 'short numerical',
+        'value'        => '',
+        'subject'      => 'main'
+    ),
     'handling_base'              => array(
         'value'        => 'order',
         'title'        => 'База расчета комплектации',

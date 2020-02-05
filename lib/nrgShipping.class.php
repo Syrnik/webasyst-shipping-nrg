@@ -8,7 +8,6 @@
 use SergeR\CakeUtility\Hash;
 use Syrnik\nrgShipping\EstimatedDelivery;
 use Syrnik\WaShippingUtils;
-use SergeR\Util\EvalMath;
 
 /**
  * @property string $delivery_type
@@ -26,6 +25,8 @@ use SergeR\Util\EvalMath;
  * @property string $handling_cost
  *
  * @property string $city_hide
+ * @property-read string $free_delivery_door
+ * @property-read string $free_delivery_terminal
  */
 class nrgShipping extends waShipping
 {

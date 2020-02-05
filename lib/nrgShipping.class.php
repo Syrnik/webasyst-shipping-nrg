@@ -29,8 +29,14 @@ use SergeR\Util\EvalMath;
  */
 class nrgShipping extends waShipping
 {
+    /**
+     * @var
+     */
     private $config;
 
+    /**
+     * @return array
+     */
     public function allowedAddress()
     {
         return array(array('country' => 'rus'));
@@ -62,6 +68,12 @@ class nrgShipping extends waShipping
         return 'm';
     }
 
+    /**
+     * @param array $params
+     * @return string
+     * @throws SmartyException
+     * @throws waException
+     */
     public function getSettingsHTML($params = array())
     {
         $view = wa()->getView();
@@ -162,6 +174,9 @@ class nrgShipping extends waShipping
         return $my_city_code != $this->sender_city_code;
     }
 
+    /**
+     * @return array
+     */
     public function requestedAddressFields()
     {
         return array(
@@ -170,6 +185,11 @@ class nrgShipping extends waShipping
         );
     }
 
+    /**
+     * @param array $settings
+     * @return array
+     * @throws waException
+     */
     public function saveSettings($settings = array())
     {
         if (array_key_exists('sender_zip', $settings)) {
@@ -193,6 +213,8 @@ class nrgShipping extends waShipping
      * @param $name
      * @param array $params
      * @return string
+     * @throws SmartyException
+     * @throws waException
      */
     public function settingPackageSelect($name, $params = array())
     {
@@ -239,13 +261,18 @@ class nrgShipping extends waShipping
         return $control;
     }
 
+    /**
+     * @param null $tracking_id
+     * @return string
+     */
     public function tracking($tracking_id = null)
     {
         return 'Отследить сосояние доставки по номеру накладной на сайте ТК Энергия <a href="https://nrg-tk.ru/client/tracking/">https://nrg-tk.ru/client/tracking/</a>';
     }
 
     /**
-     *
+     * @return array|false|string
+     * @throws waException
      */
     protected function calculate()
     {
@@ -398,6 +425,11 @@ class nrgShipping extends waShipping
         return $weight > 0 ? $weight : 0.1;
     }
 
+    /**
+     * @param $city_id
+     * @return array
+     * @throws waException
+     */
     protected function getWarehouses($city_id)
     {
         $cache = wa()->getCache('default', 'webasyst');
@@ -428,6 +460,9 @@ class nrgShipping extends waShipping
         return (array)Hash::get($city, 'warehouses');
     }
 
+    /**
+     * @return bool
+     */
     protected function hasZeroWeightItems()
     {
         $items = $this->getItems();
@@ -450,6 +485,9 @@ class nrgShipping extends waShipping
         ]);
     }
 
+    /**
+     * @throws Exception
+     */
     protected function initControls()
     {
         $this->registerControl('PackageSelect', [$this, 'settingPackageSelect']);
@@ -595,6 +633,10 @@ class nrgShipping extends waShipping
         return $dimensions;
     }
 
+    /**
+     * @param $msg
+     * @param bool $critical
+     */
     private static function _log($msg, $critical = false)
     {
         if (waSystemConfig::isDebug() || $critical) {

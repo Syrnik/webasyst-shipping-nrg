@@ -499,50 +499,21 @@ class nrgShipping extends waShipping
      *
      * @param float|string $nrg_cost
      * @return float
+     * @deprecated
      */
     private function calcTotalCost($nrg_cost)
     {
-        $nrg_cost = WaShippingUtils::strToFloat($nrg_cost);
-        $percent_sign_pos = strpos($this->handling_cost, '%');
-
-        // Если процентов нет, то и думать нечего. Приплюсуем и все дела
-        if (($percent_sign_pos === false) && ($this->handling_base != 'formula')) {
-            return round(WaShippingUtils::strToFloat($this->handling_cost) + $nrg_cost, 2);
-        }
-
-        if ($this->handling_base == 'formula') {
-            $EvalMath = new EvalMath\EvalMath();
-
-            try {
-                $EvalMath->evaluate('z=' . str_replace(',', '.', (string)$this->getTotalPrice()));
-                $EvalMath->evaluate('s=' . str_replace(',', '.', (string)$nrg_cost));
-                $math_result = $EvalMath->evaluate($this->handling_cost);
-            } catch (EvalMath\Exception\AbstractEvalMathException $e) {
-                self::_log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $e->getMessage() . ')');
-                return round($nrg_cost, 2);
-            }
-
-            return round($math_result, 2);
-        }
-
-        switch ($this->handling_base) {
-            case 'shipping' :
-                $base = $nrg_cost;
-                break;
-            case 'order_shipping':
-                $base = $this->getTotalPrice() + $nrg_cost;
-                break;
-            case 'order':
-            default:
-                $base = $this->getTotalPrice();
-        }
-
-        $cost = substr($this->handling_cost, 0, $percent_sign_pos);
-        if (strlen($cost) < 1) {
+        if (!trim($this->handling_cost)) {
             return $nrg_cost;
         }
 
-        return round($nrg_cost + $base * floatval($cost) / 100, 2);
+        return max(0, WaShippingUtils::calcTotalCost(
+            $nrg_cost,
+            $this->getTotalPrice(),
+            $this->getTotalRawPrice(),
+            strtolower($this->handling_cost),
+            $this->handling_base
+        ));
     }
 
     /**

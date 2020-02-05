@@ -362,7 +362,7 @@ class nrgShipping extends waShipping
                 $id = 'TODOOR-' . $variant['typeId'];
 
                 $todoor[$id] = array(
-                    'rate'     => $this->calcTotalCost($variant['price'] + $result['delivery']['price'] + $pickup_price),
+                    'rate'     => $this->calcTotalCost($variant['price'] + $result['delivery']['price'] + $pickup_price, $this->free_delivery_door),
                     'currency' => 'RUB',
                     'name'     => $variant['type'] . '+до двери',
                     'comment'  => $variant['type'] . '-доставка и экспедирование по городу до адреса',
@@ -386,7 +386,7 @@ class nrgShipping extends waShipping
                     $id = 'WRH-' . $w['id'] . '-' . $t['typeId'];
                     $ware[$id] = array(
                         'name'        => $w['title'] . ' / ' . $t['type'],
-                        'rate'        => $this->calcTotalCost($t['price'] + $pickup_price),
+                        'rate'        => $this->calcTotalCost($t['price'] + $pickup_price, $this->free_delivery_terminal),
                         'currency'    => 'RUB',
                         'comment'     => $w['address'] . '; ' . $w['phone'],
                         'type'        => waShipping::TYPE_PICKUP,
@@ -499,13 +499,15 @@ class nrgShipping extends waShipping
      * Расчет наценки
      *
      * @param float|string $nrg_cost
+     * @param string $free_delivery
      * @return float
      * @deprecated
      */
-    private function calcTotalCost($nrg_cost)
+    private function calcTotalCost($nrg_cost, $free_delivery = '')
     {
-        if (!trim($this->handling_cost)) {
-            return $nrg_cost;
+        $handling_base = $this->handling_base;
+        if (!trim($this->handling_cost) && $this->handling_base == 'formula') {
+            $handling_base = 'order';
         }
 
         return max(0, WaShippingUtils::calcTotalCost(
@@ -513,7 +515,8 @@ class nrgShipping extends waShipping
             $this->getTotalPrice(),
             $this->getTotalRawPrice(),
             strtolower($this->handling_cost),
-            $this->handling_base
+            $handling_base,
+            $free_delivery
         ));
     }
 

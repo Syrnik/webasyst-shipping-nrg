@@ -8,7 +8,6 @@
 use SergeR\CakeUtility\Hash;
 use Syrnik\nrgShipping\EstimatedDelivery;
 use Syrnik\WaShippingUtils;
-use SergeR\Util\EvalMath;
 
 /**
  * @property string $delivery_type
@@ -26,11 +25,19 @@ use SergeR\Util\EvalMath;
  * @property string $handling_cost
  *
  * @property string $city_hide
+ * @property-read string $free_delivery_door
+ * @property-read string $free_delivery_terminal
  */
 class nrgShipping extends waShipping
 {
+    /**
+     * @var
+     */
     private $config;
 
+    /**
+     * @return array
+     */
     public function allowedAddress()
     {
         return array(array('country' => 'rus'));
@@ -62,6 +69,12 @@ class nrgShipping extends waShipping
         return 'm';
     }
 
+    /**
+     * @param array $params
+     * @return string
+     * @throws SmartyException
+     * @throws waException
+     */
     public function getSettingsHTML($params = array())
     {
         $view = wa()->getView();
@@ -162,6 +175,9 @@ class nrgShipping extends waShipping
         return $my_city_code != $this->sender_city_code;
     }
 
+    /**
+     * @return array
+     */
     public function requestedAddressFields()
     {
         return array(
@@ -170,6 +186,11 @@ class nrgShipping extends waShipping
         );
     }
 
+    /**
+     * @param array $settings
+     * @return array
+     * @throws waException
+     */
     public function saveSettings($settings = array())
     {
         if (array_key_exists('sender_zip', $settings)) {
@@ -193,6 +214,8 @@ class nrgShipping extends waShipping
      * @param $name
      * @param array $params
      * @return string
+     * @throws SmartyException
+     * @throws waException
      */
     public function settingPackageSelect($name, $params = array())
     {
@@ -239,13 +262,18 @@ class nrgShipping extends waShipping
         return $control;
     }
 
+    /**
+     * @param null $tracking_id
+     * @return string
+     */
     public function tracking($tracking_id = null)
     {
         return 'Отследить сосояние доставки по номеру накладной на сайте ТК Энергия <a href="https://nrg-tk.ru/client/tracking/">https://nrg-tk.ru/client/tracking/</a>';
     }
 
     /**
-     *
+     * @return array|false|string
+     * @throws waException
      */
     protected function calculate()
     {
@@ -334,7 +362,7 @@ class nrgShipping extends waShipping
                 $id = 'TODOOR-' . $variant['typeId'];
 
                 $todoor[$id] = array(
-                    'rate'     => $this->calcTotalCost($variant['price'] + $result['delivery']['price'] + $pickup_price),
+                    'rate'     => $this->calcTotalCost($variant['price'] + $result['delivery']['price'] + $pickup_price, $this->free_delivery_door),
                     'currency' => 'RUB',
                     'name'     => $variant['type'] . '+до двери',
                     'comment'  => $variant['type'] . '-доставка и экспедирование по городу до адреса',
@@ -358,7 +386,7 @@ class nrgShipping extends waShipping
                     $id = 'WRH-' . $w['id'] . '-' . $t['typeId'];
                     $ware[$id] = array(
                         'name'        => $w['title'] . ' / ' . $t['type'],
-                        'rate'        => $this->calcTotalCost($t['price'] + $pickup_price),
+                        'rate'        => $this->calcTotalCost($t['price'] + $pickup_price, $this->free_delivery_terminal),
                         'currency'    => 'RUB',
                         'comment'     => $w['address'] . '; ' . $w['phone'],
                         'type'        => waShipping::TYPE_PICKUP,
@@ -398,6 +426,11 @@ class nrgShipping extends waShipping
         return $weight > 0 ? $weight : 0.1;
     }
 
+    /**
+     * @param $city_id
+     * @return array
+     * @throws waException
+     */
     protected function getWarehouses($city_id)
     {
         $cache = wa()->getCache('default', 'webasyst');
@@ -428,6 +461,9 @@ class nrgShipping extends waShipping
         return (array)Hash::get($city, 'warehouses');
     }
 
+    /**
+     * @return bool
+     */
     protected function hasZeroWeightItems()
     {
         $items = $this->getItems();
@@ -450,6 +486,9 @@ class nrgShipping extends waShipping
         ]);
     }
 
+    /**
+     * @throws Exception
+     */
     protected function initControls()
     {
         $this->registerControl('PackageSelect', [$this, 'settingPackageSelect']);
@@ -460,51 +499,25 @@ class nrgShipping extends waShipping
      * Расчет наценки
      *
      * @param float|string $nrg_cost
+     * @param string $free_delivery
      * @return float
+     * @deprecated
      */
-    private function calcTotalCost($nrg_cost)
+    private function calcTotalCost($nrg_cost, $free_delivery = '')
     {
-        $nrg_cost = WaShippingUtils::strToFloat($nrg_cost);
-        $percent_sign_pos = strpos($this->handling_cost, '%');
-
-        // Если процентов нет, то и думать нечего. Приплюсуем и все дела
-        if (($percent_sign_pos === false) && ($this->handling_base != 'formula')) {
-            return round(WaShippingUtils::strToFloat($this->handling_cost) + $nrg_cost, 2);
+        $handling_base = $this->handling_base;
+        if (!trim($this->handling_cost) && $this->handling_base == 'formula') {
+            $handling_base = 'order';
         }
 
-        if ($this->handling_base == 'formula') {
-            $EvalMath = new EvalMath\EvalMath();
-
-            try {
-                $EvalMath->evaluate('z=' . str_replace(',', '.', (string)$this->getTotalPrice()));
-                $EvalMath->evaluate('s=' . str_replace(',', '.', (string)$nrg_cost));
-                $math_result = $EvalMath->evaluate($this->handling_cost);
-            } catch (EvalMath\Exception\AbstractEvalMathException $e) {
-                self::_log('Ошибка исполнения формулы "' . $this->handling_cost . '" (' . $e->getMessage() . ')');
-                return round($nrg_cost, 2);
-            }
-
-            return round($math_result, 2);
-        }
-
-        switch ($this->handling_base) {
-            case 'shipping' :
-                $base = $nrg_cost;
-                break;
-            case 'order_shipping':
-                $base = $this->getTotalPrice() + $nrg_cost;
-                break;
-            case 'order':
-            default:
-                $base = $this->getTotalPrice();
-        }
-
-        $cost = substr($this->handling_cost, 0, $percent_sign_pos);
-        if (strlen($cost) < 1) {
-            return $nrg_cost;
-        }
-
-        return round($nrg_cost + $base * floatval($cost) / 100, 2);
+        return max(0, WaShippingUtils::calcTotalCost(
+            $nrg_cost,
+            $this->getTotalPrice(),
+            $this->getTotalRawPrice(),
+            strtolower($this->handling_cost),
+            $handling_base,
+            $free_delivery
+        ));
     }
 
     /**
@@ -595,6 +608,10 @@ class nrgShipping extends waShipping
         return $dimensions;
     }
 
+    /**
+     * @param $msg
+     * @param bool $critical
+     */
     private static function _log($msg, $critical = false)
     {
         if (waSystemConfig::isDebug() || $critical) {

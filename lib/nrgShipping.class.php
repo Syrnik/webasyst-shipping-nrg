@@ -86,6 +86,7 @@ class nrgShipping extends waShipping
         }
 
         $this->initControls();
+        $errors = [];
 
         $default = array(
             'instance'            => & $this,
@@ -122,7 +123,7 @@ class nrgShipping extends waShipping
         $info = $this->info($this->id);
 
         $view = wa()->getView();
-        $view->assign(compact('controls', 'info'));
+        $view->assign(compact('controls', 'info', 'errors'));
 
         return $view->fetch($this->path . '/templates/settings.html');
     }

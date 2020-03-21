@@ -74,6 +74,7 @@ class nrgShipping extends waShipping
      * @return string
      * @throws SmartyException
      * @throws waException
+     * @throws Exception
      */
     public function getSettingsHTML($params = array())
     {
@@ -607,17 +608,6 @@ class nrgShipping extends waShipping
         }
 
         return $dimensions;
-    }
-
-    /**
-     * @param $msg
-     * @param bool $critical
-     */
-    private static function _log($msg, $critical = false)
-    {
-        if (waSystemConfig::isDebug() || $critical) {
-            waLog::log($msg, 'shipping/nrg.log');
-        }
     }
 
     /**

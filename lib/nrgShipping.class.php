@@ -132,6 +132,7 @@ class nrgShipping extends waShipping
     /**
      * @param array $address
      * @return bool
+     * @throws waException
      */
     public function isAllowedAddress($address = array())
     {

@@ -79,9 +79,9 @@ class nrgShipping extends waShipping
     public function getSettingsHTML($params = array())
     {
         $view = wa()->getView();
-        if (!version_compare(PHP_VERSION, '5.6.0', '>=')) {
+        if (!version_compare(PHP_VERSION, '7.2.0', '>=')) {
             $view->assign('errors', array(
-                sprintf('Критическая ошибка. Требуется версия PHP 5.6.0 или старше. Сейчас используется %s. Работа плагина невозможна', PHP_VERSION)
+                sprintf('Критическая ошибка. Требуется версия PHP 7.2.0 или старше. Сейчас используется %s. Работа плагина невозможна', PHP_VERSION)
             ));
             return $view->fetch($this->path . '/templates/settings.html');
         }

@@ -1,15 +1,17 @@
 <?php
 /**
  * @author Serge Rodovnichenko <serge@syrnik.com>
- * @copyright Serge Rodovnichenko, 2020
+ * @copyright Serge Rodovnichenko, 2020-2021
  * @license MIT
  */
+declare(strict_types=1);
 
 namespace Syrnik\WaShippingUtils;
 
 /**
  * Методы для использования в наследниках waShipping.
  *
+ * @deprecated
  * Trait AppCapabilitiesDetector
  * @package Syrnik\WaShippingUtils
  * @method \waAppShipping getAdapter()
@@ -19,7 +21,7 @@ trait AppCapabilitiesDetector
     /**
      * @return bool
      */
-    protected function isAppSupportsSync()
+    protected function isAppSupportsSync(): bool
     {
         try {
             return !empty($this->getAdapter()->getAppProperties('sync'));
@@ -33,7 +35,7 @@ trait AppCapabilitiesDetector
      *
      * @return string
      */
-    protected function getAppDimensionSupport()
+    protected function getAppDimensionSupport(): string
     {
         try {
             $dims = $this->getAdapter()->getAppProperties('dimensions');

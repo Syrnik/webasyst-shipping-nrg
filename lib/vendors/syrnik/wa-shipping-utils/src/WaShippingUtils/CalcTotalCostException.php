@@ -1,34 +1,59 @@
 <?php
 /**
  * @author Serge Rodovnichenko <serge@syrnik.com>
- * @copyright Serge Rodovnichenko, 2018
+ * @copyright Serge Rodovnichenko, 2018-2021
  */
 
 namespace Syrnik\WaShippingUtils;
 
+/**
+ * Class CalcTotalCostException
+ * @package Syrnik\WaShippingUtils
+ */
 class CalcTotalCostException extends \RuntimeException
 {
+    /**
+     * @var
+     */
     protected $formula;
+
+    /**
+     * @var array
+     */
     protected $formula_vars = [];
 
-    final public function setFormula($formula = '')
+    /**
+     * @param string $formula
+     * @return $this
+     */
+    final public function setFormula(string $formula = ''): CalcTotalCostException
     {
         $this->formula = $formula;
         return $this;
     }
 
-    final public function setFormulaVars(array $formula_vars = [])
+    /**
+     * @param array $formula_vars
+     * @return $this
+     */
+    final public function setFormulaVars(array $formula_vars = []): CalcTotalCostException
     {
         $this->formula_vars = $formula_vars;
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
     final public function getFormula()
     {
         return $this->formula;
     }
 
-    final public function getFormulaVars()
+    /**
+     * @return array
+     */
+    final public function getFormulaVars(): array
     {
         return $this->formula_vars;
     }

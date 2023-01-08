@@ -1,145 +1,155 @@
-[
-    {
-        "name": "serger/cake-utility",
-        "version": "v1.0.0",
-        "version_normalized": "1.0.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/SergeR/cake-utils.git",
-            "reference": "c7d6554c08f1d93be9f3f4b1c5cae10733558d42"
+{
+    "packages": [
+        {
+            "name": "serger/cake-utility",
+            "version": "v1.0.0",
+            "version_normalized": "1.0.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SergeR/cake-utils.git",
+                "reference": "c7d6554c08f1d93be9f3f4b1c5cae10733558d42"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SergeR/cake-utils/zipball/c7d6554c08f1d93be9f3f4b1c5cae10733558d42",
+                "reference": "c7d6554c08f1d93be9f3f4b1c5cae10733558d42",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "suggest": {
+                "ext-intl": "To use Text::transliterate() or Text::slug()",
+                "lib-ICU": "To use Text::transliterate() or Text::slug()"
+            },
+            "time": "2019-04-04T22:17:46+00:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "SergeR\\CakeUtility\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "CakePHP Community",
+                    "homepage": "https://github.com/cakephp/utility/graphs/contributors"
+                }
+            ],
+            "description": "CakePHP 3.x Utility classes such as Inflector, String, and Hash without Cake/Core dependency",
+            "keywords": [
+                "hash",
+                "inflector",
+                "string"
+            ],
+            "install-path": "../serger/cake-utility"
         },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/SergeR/cake-utils/zipball/c7d6554c08f1d93be9f3f4b1c5cae10733558d42",
-            "reference": "c7d6554c08f1d93be9f3f4b1c5cae10733558d42",
-            "shasum": ""
+        {
+            "name": "serger/eval-math",
+            "version": "2.0.2",
+            "version_normalized": "2.0.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/SergeR/eval-math.git",
+                "reference": "a9eae61df21bd19f693f78261f40a705f0551232"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/SergeR/eval-math/zipball/a9eae61df21bd19f693f78261f40a705f0551232",
+                "reference": "a9eae61df21bd19f693f78261f40a705f0551232",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.6 || ^7 || ^8.0"
+            },
+            "require-dev": {
+                "php-coveralls/php-coveralls": "^2",
+                "phpunit/phpunit": "^5"
+            },
+            "time": "2023-01-08T10:39:51+00:00",
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.x-dev"
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "SergeR\\Util\\EvalMath\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-2-Clause"
+            ],
+            "description": "EvalMath",
+            "keywords": [
+                "EvalMath"
+            ],
+            "support": {
+                "source": "https://github.com/SergeR/eval-math/tree/2.0.2"
+            },
+            "install-path": "../serger/eval-math"
         },
-        "require": {
-            "php": ">=5.6.0"
-        },
-        "suggest": {
-            "ext-intl": "To use Text::transliterate() or Text::slug()",
-            "lib-ICU": "To use Text::transliterate() or Text::slug()"
-        },
-        "time": "2019-04-04T22:17:46+00:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "SergeR\\CakeUtility\\": "src"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "CakePHP Community",
-                "homepage": "https://github.com/cakephp/utility/graphs/contributors"
-            }
-        ],
-        "description": "CakePHP 3.x Utility classes such as Inflector, String, and Hash without Cake/Core dependency",
-        "keywords": [
-            "hash",
-            "inflector",
-            "string"
-        ]
-    },
-    {
-        "name": "serger/eval-math",
-        "version": "v2.0.0",
-        "version_normalized": "2.0.0.0",
-        "source": {
-            "type": "git",
-            "url": "https://github.com/SergeR/eval-math.git",
-            "reference": "de67b2209615bab91590aac1f462f0095af9c4aa"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://api.github.com/repos/SergeR/eval-math/zipball/de67b2209615bab91590aac1f462f0095af9c4aa",
-            "reference": "de67b2209615bab91590aac1f462f0095af9c4aa",
-            "shasum": ""
-        },
-        "require": {
-            "php": "^5.6 || ^7"
-        },
-        "require-dev": {
-            "php-coveralls/php-coveralls": "^2",
-            "phpunit/phpunit": "^5"
-        },
-        "time": "2019-09-23T14:18:21+00:00",
-        "type": "library",
-        "extra": {
-            "branch-alias": {
-                "dev-master": "2.x-dev"
-            }
-        },
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "SergeR\\Util\\EvalMath\\": "src/"
-            }
-        },
-        "notification-url": "https://packagist.org/downloads/",
-        "license": [
-            "BSD"
-        ],
-        "description": "EvalMath",
-        "keywords": [
-            "EvalMath"
-        ]
-    },
-    {
-        "name": "syrnik/wa-shipping-utils",
-        "version": "v1.9.3",
-        "version_normalized": "1.9.3.0",
-        "source": {
-            "type": "git",
-            "url": "https://gitlab.com/sergerod/wa-shipping-utils.git",
-            "reference": "a3888306085ea035289038914ce32a14aa992ef0"
-        },
-        "dist": {
-            "type": "zip",
-            "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=a3888306085ea035289038914ce32a14aa992ef0",
-            "reference": "a3888306085ea035289038914ce32a14aa992ef0",
-            "shasum": ""
-        },
-        "require": {
-            "ext-mbstring": "*",
-            "php": "^5.6 || ^7",
-            "serger/eval-math": "^2"
-        },
-        "require-dev": {
-            "phpunit/phpunit": "^5"
-        },
-        "time": "2020-02-14T17:16:54+03:00",
-        "type": "library",
-        "installation-source": "dist",
-        "autoload": {
-            "psr-4": {
-                "Syrnik\\": "src/"
-            }
-        },
-        "license": [
-            "MIT"
-        ],
-        "authors": [
-            {
-                "name": "Serge Rodovnichenko",
-                "email": "serge@syrnik.com",
-                "role": "developer"
-            }
-        ],
-        "description": "Набор статических методов для использования в плагинах расчёта стоимости доставки для Webasyst Framework",
-        "keywords": [
-            "shipping",
-            "webasyst"
-        ],
-        "support": {
-            "email": "support@syrnik.com",
-            "source": "https://gitlab.com/sergerod/wa-shipping-utils",
-            "issues": "https://gitlab.com/sergerod/wa-shipping-utils/issues"
+        {
+            "name": "syrnik/wa-shipping-utils",
+            "version": "2.0.0",
+            "version_normalized": "2.0.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://gitlab.com/sergerod/wa-shipping-utils.git",
+                "reference": "da8337d3bbbe1ae4072dc204c41e033f144a84ab"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=da8337d3bbbe1ae4072dc204c41e033f144a84ab",
+                "reference": "da8337d3bbbe1ae4072dc204c41e033f144a84ab",
+                "shasum": ""
+            },
+            "require": {
+                "ext-mbstring": "*",
+                "php": ">=7.2",
+                "serger/eval-math": "^2"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^8"
+            },
+            "time": "2023-01-08T05:14:25+03:00",
+            "type": "library",
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "Syrnik\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Serge Rodovnichenko",
+                    "email": "serge@syrnik.com",
+                    "role": "developer"
+                }
+            ],
+            "description": "Набор статических методов для использования в плагинах расчёта стоимости доставки для Webasyst Framework",
+            "keywords": [
+                "shipping",
+                "webasyst"
+            ],
+            "support": {
+                "email": "support@syrnik.com",
+                "source": "https://gitlab.com/sergerod/wa-shipping-utils",
+                "issues": "https://gitlab.com/sergerod/wa-shipping-utils/issues"
+            },
+            "install-path": "../syrnik/wa-shipping-utils"
         }
-    }
-]
+    ],
+    "dev": true,
+    "dev-package-names": []
+}

@@ -518,8 +518,8 @@ class nrgShipping extends waShipping
             $this->getTotalPrice(),
             $this->getTotalRawPrice(),
             strtolower($this->handling_cost),
-            $handling_base,
-            $free_delivery
+            (string)$handling_base,
+            (string)$free_delivery
         ));
     }
 

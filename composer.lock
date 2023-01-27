@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "c50938e995133b557946984a385527f9",
+    "content-hash": "fb994d992fc42583cb6bc45e7cd0c700",
     "packages": [
         {
             "name": "serger/cake-utility",
@@ -49,24 +49,28 @@
                 "inflector",
                 "string"
             ],
+            "support": {
+                "issues": "https://github.com/SergeR/cake-utils/issues",
+                "source": "https://github.com/SergeR/cake-utils/tree/v1.0.0"
+            },
             "time": "2019-04-04T22:17:46+00:00"
         },
         {
             "name": "serger/eval-math",
-            "version": "v2.0.0",
+            "version": "2.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/SergeR/eval-math.git",
-                "reference": "de67b2209615bab91590aac1f462f0095af9c4aa"
+                "reference": "a9eae61df21bd19f693f78261f40a705f0551232"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/SergeR/eval-math/zipball/de67b2209615bab91590aac1f462f0095af9c4aa",
-                "reference": "de67b2209615bab91590aac1f462f0095af9c4aa",
+                "url": "https://api.github.com/repos/SergeR/eval-math/zipball/a9eae61df21bd19f693f78261f40a705f0551232",
+                "reference": "a9eae61df21bd19f693f78261f40a705f0551232",
                 "shasum": ""
             },
             "require": {
-                "php": "^5.6 || ^7"
+                "php": "^5.6 || ^7 || ^8.0"
             },
             "require-dev": {
                 "php-coveralls/php-coveralls": "^2",
@@ -85,35 +89,38 @@
             },
             "notification-url": "https://packagist.org/downloads/",
             "license": [
-                "BSD"
+                "BSD-2-Clause"
             ],
             "description": "EvalMath",
             "keywords": [
                 "EvalMath"
             ],
-            "time": "2019-09-23T14:18:21+00:00"
+            "support": {
+                "source": "https://github.com/SergeR/eval-math/tree/2.0.2"
+            },
+            "time": "2023-01-08T10:39:51+00:00"
         },
         {
             "name": "syrnik/wa-shipping-utils",
-            "version": "v1.9.3",
+            "version": "2.0.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/sergerod/wa-shipping-utils.git",
-                "reference": "a3888306085ea035289038914ce32a14aa992ef0"
+                "reference": "da8337d3bbbe1ae4072dc204c41e033f144a84ab"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=a3888306085ea035289038914ce32a14aa992ef0",
-                "reference": "a3888306085ea035289038914ce32a14aa992ef0",
+                "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=da8337d3bbbe1ae4072dc204c41e033f144a84ab",
+                "reference": "da8337d3bbbe1ae4072dc204c41e033f144a84ab",
                 "shasum": ""
             },
             "require": {
                 "ext-mbstring": "*",
-                "php": "^5.6 || ^7",
+                "php": ">=7.2",
                 "serger/eval-math": "^2"
             },
             "require-dev": {
-                "phpunit/phpunit": "^5"
+                "phpunit/phpunit": "^8"
             },
             "type": "library",
             "autoload": {
@@ -141,7 +148,7 @@
                 "source": "https://gitlab.com/sergerod/wa-shipping-utils",
                 "issues": "https://gitlab.com/sergerod/wa-shipping-utils/issues"
             },
-            "time": "2020-02-14T17:16:54+03:00"
+            "time": "2023-01-08T05:14:25+03:00"
         }
     ],
     "packages-dev": [],
@@ -153,6 +160,7 @@
     "platform": [],
     "platform-dev": [],
     "platform-overrides": {
-        "php": "5.6.0"
-    }
+        "php": "7.2.0"
+    },
+    "plugin-api-version": "2.3.0"
 }

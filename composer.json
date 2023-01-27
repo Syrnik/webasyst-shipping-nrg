@@ -10,7 +10,7 @@
   "config": {
     "vendor-dir": "lib/vendors",
     "platform": {
-      "php": "5.6.0"
+      "php": "7.2.0"
     },
     "secure-http": false
   },
@@ -21,7 +21,7 @@
     }
   ],
   "require": {
-    "syrnik/wa-shipping-utils": "^1.5",
+    "syrnik/wa-shipping-utils": "^2",
     "serger/cake-utility": "^1",
     "serger/eval-math": "^2"
   }

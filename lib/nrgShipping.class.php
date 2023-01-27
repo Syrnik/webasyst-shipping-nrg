@@ -79,9 +79,9 @@ class nrgShipping extends waShipping
     public function getSettingsHTML($params = array())
     {
         $view = wa()->getView();
-        if (!version_compare(PHP_VERSION, '5.6.0', '>=')) {
+        if (!version_compare(PHP_VERSION, '7.2.0', '>=')) {
             $view->assign('errors', array(
-                sprintf('Критическая ошибка. Требуется версия PHP 5.6.0 или старше. Сейчас используется %s. Работа плагина невозможна', PHP_VERSION)
+                sprintf('Критическая ошибка. Требуется версия PHP 7.2.0 или старше. Сейчас используется %s. Работа плагина невозможна', PHP_VERSION)
             ));
             return $view->fetch($this->path . '/templates/settings.html');
         }
@@ -132,6 +132,7 @@ class nrgShipping extends waShipping
     /**
      * @param array $address
      * @return bool
+     * @throws waException
      */
     public function isAllowedAddress($address = array())
     {
@@ -270,7 +271,7 @@ class nrgShipping extends waShipping
      */
     public function tracking($tracking_id = null)
     {
-        return 'Отследить сосояние доставки по номеру накладной на сайте ТК Энергия <a href="https://nrg-tk.ru/client/tracking/">https://nrg-tk.ru/client/tracking/</a>';
+        return 'Отследить состояние доставки по номеру накладной на сайте ТК Энергия <a href="https://nrg-tk.ru/client/tracking/">https://nrg-tk.ru/client/tracking/</a>';
     }
 
     /**
@@ -517,8 +518,8 @@ class nrgShipping extends waShipping
             $this->getTotalPrice(),
             $this->getTotalRawPrice(),
             strtolower($this->handling_cost),
-            $handling_base,
-            $free_delivery
+            (string)$handling_base,
+            (string)$free_delivery
         ));
     }
 

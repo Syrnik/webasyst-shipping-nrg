@@ -26,6 +26,10 @@ class EstimatedDelivery
     /** @var DateTimeImmutable */
     protected $Departure;
 
+    /**
+     * EstimatedDelivery constructor.
+     * @param array $params
+     */
     public function __construct(array $params = [])
     {
         foreach ($params as $key => $param) {

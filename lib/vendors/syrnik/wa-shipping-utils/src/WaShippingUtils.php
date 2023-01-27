@@ -1,9 +1,10 @@
 <?php
 /**
  * @author Serge Rodovnichenko <serge@syrnik.com>
- * @copyright Serge Rodovnichenko, 2018
+ * @copyright Serge Rodovnichenko, 2018-2021
  * @license Webasyst
  */
+declare(strict_types=1);
 
 namespace Syrnik;
 
@@ -15,11 +16,67 @@ use SergeR\Util\EvalMath\Exception\AbstractEvalMathException;
 use Syrnik\WaShippingUtils\CalcTotalCostException;
 use SergeR\Util\EvalMath\EvalMath;
 
+/**
+ *
+ */
 class WaShippingUtils
 {
+    /**
+     * @param string|string[] $str
+     * @return array|string|string[]|null
+     */
     public static function replaceYo($str)
     {
         return preg_replace(['/ё/u', '/Ё/u'], ['е', 'Е'], $str);
+    }
+
+    /**
+     * @param string|float|null $str
+     * @param bool $nullable
+     * @return float|null
+     * @throws \InvalidArgumentException
+     */
+    public static function toFloat($str, bool $nullable = false): ?float
+    {
+        if ($str === null) {
+            if ($nullable) return null;
+            else return 0.0;
+        }
+
+        if (is_string($str)) {
+            if (!($str = trim($str))) {
+                if ($nullable) return null;
+                else $str = 0;
+            } else {
+                return (float)str_replace(',', '.', trim($str));
+            }
+        }
+
+        if (is_numeric($str)) return (float)$str;
+
+        throw new \InvalidArgumentException("string or number required");
+    }
+
+    /**
+     * @param int|float|string $str
+     * @param int|null $precision
+     * @param float|null $min
+     * @param float|null $max
+     * @param bool $nullable
+     * @return float|null
+     * @throws \InvalidArgumentException
+     */
+    public static function floatval($str, ?int $precision = null, ?float $min = null, ?float $max = null, bool $nullable = false): ?float
+    {
+        $value = self::toFloat($str, $nullable);
+
+        if ($value === null) return null;
+
+        if ($precision !== null) $value = round($value, $precision);
+        if ($min !== null) $value = (float)max($min, $value);
+        if ($max !== null) $value = (float)min($max, $value);
+
+        return $value;
     }
 
     /**
@@ -28,7 +85,7 @@ class WaShippingUtils
      * @param string $str
      * @return string
      */
-    public static function mb_trim($str)
+    public static function mb_trim(string $str): string
     {
         return preg_replace('/^[[:space:]]*([\s\S]*?)[[:space:]]*$/ui', '\1', $str);
     }
@@ -52,7 +109,7 @@ class WaShippingUtils
      * @return int
      * @throws Exception
      */
-    public static function calcDaysToShip($limit_hour = 0, $add_days = 0, array $weekdays = ['1', '2', '3', '4', '5', '6', '7'], array $params = [])
+    public static function calcDaysToShip(int $limit_hour = 0, int $add_days = 0, array $weekdays = ['1', '2', '3', '4', '5', '6', '7'], array $params = []): int
     {
         $limit_hour = (($limit_hour > 0) && ($limit_hour < 24)) ? $limit_hour : 0;
         $one_day = new DateInterval('P1D');
@@ -135,7 +192,7 @@ class WaShippingUtils
      * @param string $excluded
      * @return bool
      */
-    public static function isBannedLocation($city_name, $region_code, $excluded)
+    public static function isBannedLocation(string $city_name, string $region_code, string $excluded): bool
     {
         // это у нас такой рантайм кэш типа
         static $_rules;
@@ -223,7 +280,7 @@ class WaShippingUtils
      * @throws CalcTotalCostException
      * @todo Надо вообще все перевести в формулы
      */
-    public static function calcTotalCost($carrier_cost, $total_price = 0.0, $total_raw_price = 0.0, $handling_cost = '0', $handling_base = 'shipping', $free = '')
+    public static function calcTotalCost(float $carrier_cost, float $total_price = 0.0, float $total_raw_price = 0.0, string $handling_cost = '0', string $handling_base = 'shipping', string $free = ''): float
     {
         static $_cache;
         if (!is_array($_cache)) {
@@ -296,10 +353,10 @@ class WaShippingUtils
      * @param string $rounding_type
      * @return float
      */
-    public static function roundPrice($price, $rounding = '0.01', $rounding_type = 'std')
+    public static function roundPrice($price, $rounding = '0.01', string $rounding_type = 'std'): float
     {
-        $price = static::strToFloat($price);
-        $rounding = static::strToFloat($rounding);
+        $price = is_string($price) ? static::toFloat($price) : $price;
+        $rounding = is_string($rounding) ? static::toFloat($rounding) : $rounding;
         $precision = (int)(0 - log10($rounding));
         $rounded = round($price, $precision);
 
@@ -321,8 +378,9 @@ class WaShippingUtils
     /**
      * @param string $str
      * @return float
+     * @deprecated toFloat() instead
      */
-    public static function strToFloat($str)
+    public static function strToFloat(string $str): float
     {
         return (float)str_replace(',', '.', self::mb_trim($str));
     }
@@ -333,7 +391,7 @@ class WaShippingUtils
      * @param float $value
      * @return string
      */
-    public static function monetaryString($value)
+    public static function monetaryString(float $value): string
     {
         return number_format($value, 2, '.', '');
     }
@@ -343,7 +401,7 @@ class WaShippingUtils
      * @param array $castings
      * @return bool
      */
-    public static function toBool($value, array $castings = ['true' => ['yes', 'да', 'on', 'вкл', 'true', 'истина'], 'false' => ['no', 'нет', 'off', 'выкл', 'false', 'ложь']])
+    public static function toBool($value, array $castings = ['true' => ['yes', 'да', 'on', 'вкл', 'true', 'истина'], 'false' => ['no', 'нет', 'off', 'выкл', 'false', 'ложь']]): bool
     {
         if (is_string($value)) {
             $value = mb_strtolower($value, 'UTF-8');
@@ -359,11 +417,57 @@ class WaShippingUtils
     }
 
     /**
+     * @param $value
+     * @param array{min:mixed|null, max:mixed|null} $range
+     * @return bool
+     */
+    public static function inRange($value, array $range = []): bool
+    {
+        $min = $range['min'] ?? null;
+        $max = $range['max'] ?? null;
+        if ($min === null && $max === null) return true;
+        if ($min !== null && $value < $min) return false;
+        if ($max !== null && $value > $max) return false;
+
+        return true;
+    }
+
+    /**
+     * @param array $size
+     * @param array $limits
+     * @return bool
+     */
+    public static function isDimensionsLessOrEquals(array $size, array $limits): bool
+    {
+        if (!$size || !$limits) return true;
+        if (count($size) !== 3 || count($limits) !== 3) throw new \InvalidArgumentException("size and limit must contain explicitly three items each");
+        if (in_array(null, $size, true) || in_array(null, $limits, true)) return true;
+        $size = array_values($size);
+        $limits = array_values($limits);
+        sort($size, SORT_NUMERIC);
+        sort($limits, SORT_NUMERIC);
+
+        return $limits[0] >= $size[0] && $limits[1] >= $size[1] && $limits[2] >= $size[2];
+    }
+
+    /**
+     * @param $value
+     * @param int $precision
+     * @return string
+     */
+    public static function formatNumber($value, int $precision = 2): string
+    {
+        $value = number_format($value, $precision, '.', '');
+
+        return rtrim(rtrim($value, '0'), '.');
+    }
+
+    /**
      * @param string|array|\ArrayAccess $delivery
-     * @param null|string $plugin_id
+     * @param string|null $plugin_id
      * @return object
      */
-    public static function extractShippingVariantAndPlugin($delivery, $plugin_id = null)
+    public static function extractShippingVariantAndPlugin($delivery, ?string $plugin_id = null): object
     {
         $result = ['plugin' => '', 'variant' => '', 'error' => true];
 
@@ -373,8 +477,8 @@ class WaShippingUtils
 
             if ((!$plugin || !$variant_id) && isset($delivery['params']) && is_array($delivery['params'])) {
                 $delivery = $delivery['params'];
-                $plugin = isset($delivery['shipping_plugin']) ? $delivery['shipping_plugin'] : null;
-                $variant_id = isset($delivery['shipping_rate_id']) ? $delivery['shipping_rate_id'] : null;
+                $plugin = $delivery['shipping_plugin'] ?? null;
+                $variant_id = $delivery['shipping_rate_id'] ?? null;
             }
 
             if ($plugin && $variant_id) {

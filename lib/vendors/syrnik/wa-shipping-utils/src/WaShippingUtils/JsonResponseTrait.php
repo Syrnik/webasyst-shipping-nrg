@@ -9,6 +9,7 @@ namespace Syrnik\WaShippingUtils;
 
 /**
  * Trait JsonResponseTrait
+ * @deprecated
  * @package Syrnik\WaShippingUtils
  */
 trait JsonResponseTrait

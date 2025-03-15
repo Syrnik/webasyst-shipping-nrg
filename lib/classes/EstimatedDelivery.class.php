@@ -5,6 +5,8 @@
  * @license Webasyst
  */
 
+declare(strict_types=1);
+
 namespace Syrnik\nrgShipping;
 
 use DateInterval;

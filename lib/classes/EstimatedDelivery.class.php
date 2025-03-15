@@ -19,9 +19,9 @@ use waException;
  */
 class EstimatedDelivery
 {
-    protected $MinDays = 0;
+    protected int $MinDays = 0;
 
-    protected $MaxDays = 0;
+    protected int $MaxDays = 0;
 
     /** @var DateTimeImmutable */
     protected $Departure;
@@ -44,7 +44,6 @@ class EstimatedDelivery
         }
 
         if (!$this->Departure) {
-            // конструктор immutable бросает исключения и штром ругается, что я их не ловлю. Но тут и ловить нечего
             $this->Departure = date_create_immutable();
         }
     }
@@ -54,7 +53,7 @@ class EstimatedDelivery
      * @param string $delimiter
      * @return $this
      */
-    public function parseRange($range, $delimiter = '-')
+    public function parseRange(string $range, string $delimiter = '-'): EstimatedDelivery
     {
         $range = explode($delimiter, $range, 2);
         $_range[] = (int)trim(ifset($range, '0', 0));
@@ -77,7 +76,7 @@ class EstimatedDelivery
      * @return $this
      * @throws waException
      */
-    public function parseRegexRange($range)
+    public function parseRegexRange($range): EstimatedDelivery
     {
         $matches = [];
         $_range = [0, 0];
@@ -102,7 +101,7 @@ class EstimatedDelivery
     /**
      * @return int
      */
-    public function getMinDays()
+    public function getMinDays(): int
     {
         return $this->MinDays;
     }
@@ -111,7 +110,7 @@ class EstimatedDelivery
      * @param int $MinDays
      * @return EstimatedDelivery
      */
-    public function setMinDays($MinDays)
+    public function setMinDays(int $MinDays): EstimatedDelivery
     {
         $this->MinDays = $MinDays;
         return $this;
@@ -120,7 +119,7 @@ class EstimatedDelivery
     /**
      * @return int
      */
-    public function getMaxDays()
+    public function getMaxDays(): int
     {
         return $this->MaxDays;
     }
@@ -129,7 +128,7 @@ class EstimatedDelivery
      * @param int $MaxDays
      * @return EstimatedDelivery
      */
-    public function setMaxDays($MaxDays)
+    public function setMaxDays(int $MaxDays): EstimatedDelivery
     {
         $this->MaxDays = $MaxDays;
         return $this;
@@ -140,7 +139,7 @@ class EstimatedDelivery
      *
      * @return bool
      */
-    public function isExactDay()
+    public function isExactDay(): bool
     {
         return $this->getMinDays() === $this->getMaxDays();
     }
@@ -148,7 +147,7 @@ class EstimatedDelivery
     /**
      * @return DateTimeImmutable
      */
-    public function getDeparture()
+    public function getDeparture(): DateTimeImmutable
     {
         return $this->Departure;
     }
@@ -157,7 +156,7 @@ class EstimatedDelivery
      * @param DateTimeImmutable $Departure
      * @return EstimatedDelivery
      */
-    public function setDeparture(DateTimeImmutable $Departure)
+    public function setDeparture(DateTimeImmutable $Departure): EstimatedDelivery
     {
         $this->Departure = $Departure;
         return $this;
@@ -168,7 +167,7 @@ class EstimatedDelivery
      * @param string $format
      * @return $this
      */
-    public function setDepartureString($departure, $format = 'Y-m-d H:i:s')
+    public function setDepartureString(string $departure, string $format = 'Y-m-d H:i:s'): EstimatedDelivery
     {
         if ($format) {
             $_departure = date_create_immutable_from_format($format, $departure);
@@ -183,7 +182,7 @@ class EstimatedDelivery
      * @return DateTimeImmutable
      * @throws Exception
      */
-    public function getMinDateTime()
+    public function getMinDateTime(): DateTimeImmutable
     {
         return $this->getDeparture()->add(new DateInterval('P' . $this->getMinDays() . 'D'));
     }
@@ -192,7 +191,7 @@ class EstimatedDelivery
      * @return DateTimeImmutable
      * @throws Exception
      */
-    public function getMaxDateTime()
+    public function getMaxDateTime(): DateTimeImmutable
     {
         return $this->getDeparture()->add(new DateInterval('P' . $this->getMaxDays() . 'D'));
     }
@@ -203,7 +202,7 @@ class EstimatedDelivery
      * @throws waException
      * @throws Exception
      */
-    public function getWebasystEstDelivery($format = 'humandate')
+    public function getWebasystEstDelivery(string $format = 'humandate'): string
     {
         if ($this->isExactDay()) {
             return waDateTime::format($format, $this->getMinDateTime()->getTimestamp());
@@ -230,7 +229,7 @@ class EstimatedDelivery
      * @return array
      * @throws waException|Exception
      */
-    public function getWebasystShippingParams($format = 'humandate')
+    public function getWebasystShippingParams(string $format = 'humandate'): array
     {
         return array(
             'est_delivery'  => $this->getWebasystEstDelivery($format),
@@ -241,7 +240,7 @@ class EstimatedDelivery
     /**
      * @return bool
      */
-    public function isValid()
+    public function isValid(): bool
     {
         return ($this->getMaxDays() >= $this->getMinDays()) && ($this->getMinDays() >= 0);
     }

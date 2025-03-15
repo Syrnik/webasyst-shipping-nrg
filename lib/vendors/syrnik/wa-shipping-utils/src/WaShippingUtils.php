@@ -309,7 +309,10 @@ class WaShippingUtils
 
         if ($handling_base == 'formula') {
             $EvalMath = new EvalMath;
-            $handling_cost = strtolower($handling_cost);
+            $handling_cost = trim(strtolower($handling_cost));
+            if (!strlen($handling_cost)) {
+                return $carrier_cost;
+            }
 
             try {
                 $EvalMath->evaluate('z=' . str_replace(',', '.', (string)$total_price));
@@ -319,7 +322,7 @@ class WaShippingUtils
             } catch (AbstractEvalMathException $e) {
                 throw (new CalcTotalCostException($e->getMessage()))->setFormula($handling_cost)->setFormulaVars($EvalMath->vars());
             }
-            return max(0.0, round($math_result, 2));
+            return max(0.0, round((float)$math_result, 2));
         }
 
         switch ($handling_base) {

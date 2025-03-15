@@ -1,23 +1,36 @@
+{$is_ui2 = version_compare($wa->whichUI(), '2.0', '>=')}
 {if $external_calc_support}
-    <i><b>Настройка не требуется</b> <span class="hint">— плагин будет использовать габариты отправления, рассчитанные вашим приложением</span></i>
+    {if $is_ui2}
+        <div class="info alert">
+            <b class="semibold">Настройка не требуется</b>
+            — плагин будет использовать габариты отправления, рассчитанные вашим приложением
+        </div>
+    {else}
+        <i><b>Настройка не требуется</b>
+            <span class="hint">— плагин будет использовать габариты отправления, рассчитанные вашим приложением</span></i>
+    {/if}
     {foreach $params.value as $value}<input type="hidden" name="{$namespace|escape}[{$value@index}][min_weight]" value="{$value.min_weight|escape}">
         <input type="hidden" name="{$namespace|escape}[{$value@index}][package]" value="{$value.package|escape}">{/foreach}
 {else}
-<div class="block padding" style="padding-left: 0" id="{$params.id}">
-    <table class="zebra">
+<div {if $is_ui2}class="box" {else}class="block padding" style="padding-left: 0"{/if} id="{$params.id}">
+    <table class="zebra" {if !$is_ui2}style="width: max-content"{/if}>
         <thead>
         <tr class="white">
-            <th colspan="2">Вес отправления (кг.)</th>
+            <th colspan="2">Вес отправления</th>
             <th>&nbsp;</th>
-            <th>Размер упаковки (см.)</th>
+            <th>Размер упаковки</th>
             <th>&nbsp;</th>
         </tr>
         </thead>
         <tfoot>
         <tr class="white">
             <td colspan="3">
-                <a href="javascript:void(0)" class="inline-link package-selector-add-pkg-rule-btn"><i class="icon16 add"></i> <b><i>Добавить
+                {if $is_ui2}
+                    <button class="smaller green button nobutton js-package-selector-add-pkg-rule-btn"><i class="fas fa-plus-circle"></i> Добавить размер</button>
+                {else}
+                <a href="javascript:void(0)" class="inline-link js-package-selector-add-pkg-rule-btn"><i class="icon16 add"></i> <b><i>Добавить
                             размер</i></b></a>
+                {/if}
             </td>
             <td><span class="hint">ДxШxВ - средние размеры типичной посылки, (длина)x(ширина)x(высота). <b>Используйте
                         латинскую x (икс) в качестве разделителя!</b></span></td>
@@ -25,47 +38,58 @@
         </tr>
         </tfoot>
         {foreach $params.value as $value}
-            <tr class="package-selector-pkg-row">
-                <td class="min-width">&gt;</td>
-                <td>
-                    <input type="text" name="{$namespace|escape}[{$value@index}][min_weight]"
-                           value="{$value.min_weight|escape}">
+            <tr class="js-package-selector-pkg-row">
+                <td class="min-width">от</td>
+                <td class="nowrap">
+                    <input type="number"
+                           required
+                           min="0"
+                           step="0.01"
+                           class="{if $is_ui2}shortest{else}short numerical{/if}"
+                           name="{$namespace|escape}[{$value@index}][min_weight]"
+                           value="{$value.min_weight|escape}">&nbsp;кг.
                 </td>
-                <td>→</td>
-                <td>
-                    <input type="text" name="{$namespace|escape}[{$value@index}][package]"
-                           value="{$value.package|escape}">
+                <td>{if $is_ui2}<i class="fas fa-arrow-right"></i>{else}→{/if}</td>
+                <td class="nowrap">
+                    <input type="text"
+                           name="{$namespace|escape}[{$value@index}][package]"
+                           required
+                           pattern="[0-9]+x[0-9]+x[0-9]+"
+                           value="{$value.package|escape}">&nbsp;см.
                 </td>
-                <td><a href="javascript:void(0)" class="package-selector-remove-pkg-rule-btn" title="Удалить"><i
-                                class="icon16 delete"></i>Удалить</a></td>
+                <td>{if $is_ui2}<button class="smallest red button nobutton js-package-selector-remove-pkg-rule-btn"><i class="fas fa-trash-alt"></i></button>{else}<a href="javascript:void(0)" class="js-package-selector-remove-pkg-rule-btn" title="Удалить"><i
+                                class="icon16 delete"></i>Удалить</a>{/if}</td>
             </tr>
         {/foreach}
     </table>
 </div>
-<script type="text/javascript">
+<script>
     $(function () {
         $('#{$params.id}')
-                .on('click', '.package-selector-add-pkg-rule-btn', function () {
-                    var $this = $(this);
-                    var $table = $this.closest('table');
-                    var $last = $table.find('tr.package-selector-pkg-row:last');
-                    var $clone = $last.clone();
+                .on('click', '.js-package-selector-add-pkg-rule-btn', function () {
+                    const $this = $(this),
+                        $table = $this.closest('table'),
+                        $last = $table.find('tr.js-package-selector-pkg-row:last'),
+                        $clone = $last.clone();
 
                     $clone.find('input').each(function () {
-                        var $input = $(this);
-                        var name = $input.attr('name');
-                        $input.attr('name', name.replace(/\[standard_parcel_dimensions\]\[(\d+)\]/, function (str, p1) {
-                            return '[standard_parcel_dimensions][' + (parseInt(p1, 10) + 1) + ']';
-                        }));
+                        const $input = $(this),
+                            name = $input.attr('name');
+
+                        $input.attr(
+                            'name',
+                            name.replace(/\[standard_parcel_dimensions]\[(\d+)]/, (str, p1) =>  '[standard_parcel_dimensions][' + (parseInt(p1, 10) + 1) + ']')
+                        );
                         $input.val('');
                     });
                     $last.after($clone);
                     return false;
                 })
-                .on('click', '.package-selector-remove-pkg-rule-btn', function(){
-                    var $this = $(this);
-                    var $table = $this.closest('table');
-                    if ($('tr.package-selector-pkg-row', $table).length > 1) {
+                .on('click', '.js-package-selector-remove-pkg-rule-btn', function(){
+                    const $this = $(this),
+                        $table = $this.closest('table');
+
+                    if ($('tr.js-package-selector-pkg-row', $table).length > 1) {
                         $this.closest('tr').remove();
                     } else {
                         $this.closest('tr').find('input').val('');

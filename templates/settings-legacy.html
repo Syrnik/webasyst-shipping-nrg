@@ -4,10 +4,11 @@
         <li><a href="javascript:void(0)" data-tab="about">Помощь</a></li>
     </ul>
     <div class="tab-content js-tabs-content-container">
-        <div id="ws-plugin-nrg-main-tab" class="box tab js-tab-content js-fields-tab">
+        <div id="ws-plugin-nrg-main-tab" class="block tab js-tab-content js-fields-tab">
+            <h2>Настройки</h2>
             {foreach $controls.main as $gc}{$gc}{/foreach}
         </div>
-        <div id="ws-plugin-nrg-about-tab" class="hidden box tab js-tab-content">
+        <div id="ws-plugin-nrg-about-tab" class="hidden block tab js-tab-content">
             <h2>Помощь</h2>
             <h3>Расчет стоимости доставки ТК &laquo;Энергия&raquo;</h3>
             <p>Версия {$info.version}<br>
@@ -49,28 +50,47 @@
         </div>
     </div>
 </div>
-<script>
-    (function ($){
-        $.wa.loadSources([
-            {
-                id: 'nrg-shipping-settings-js',
-                type: 'js',
-                uri: '{$wa_static_url}wa-plugins/shipping/nrg/js/settings.js?v={$info.version}'
-            },
-            {
-                id: 'nrg-shipping-settings-css',
-                type: 'css',
-                uri: '{$wa_static_url}wa-plugins/shipping/nrg/css/settings.css?v={$info.version}'
-            }
-        ]).done(()=>{
-            window.nrg = new nrgShippingSettings({
-                $wrapper: $('#ws-plugin-nrg-shipping-settings'),
-                urls: {$urls|json_encode:256},
-                html: {
-                    spinner: '<div class="spinner"></div>',
-                    state_error_hint: '<div class="state-error-hint js-error-message">%message%</div>',
+<script type="text/javascript">
+    (function ($) {
+        Promise.all([
+            new Promise((resolve, reject) => {
+                const url = '{$wa_static_url}wa-plugins/shipping/nrg/js/settings.js?v={$info.version}';
+                if (document.getElementById('nrg-shipping-settings-js')) {
+                    resolve(url);
+                } else {
+                    const element = document.createElement('script');
+                    element.src = url;
+                    element.id = 'nrg-shipping-settings-js';
+                    document.head.append(element)
+                    element.onload = () => resolve(url);
+                    {literal}element.onerror = () => reject(new Error(`Ошибка загрузки скрипта ${url}`));{/literal}
                 }
-            });
-        });
+            }),
+            new Promise((resolve, reject) => {
+                const url = '{$wa_static_url}wa-plugins/shipping/nrg/css/settings-legacy.css?v={$info.version}';
+                if (document.getElementById('nrg-shipping-settings-legacy-css')) resolve(url);
+                else {
+                    const element = document.createElement('link');
+                    element.rel = "stylesheet";
+                    element.type = "text/css";
+                    element.id = "nrg-shipping-settings-legacy-css";
+                    element.href = url;
+                    document.head.append(element);
+                    element.onload = () => resolve(url);
+                    element.onerror = () => reject(new Error("Ошибка загрузки таблицы стилей"));
+                }
+            })
+        ]).then(
+            () => {
+                new nrgShippingSettings({
+                    $wrapper: $('#ws-plugin-nrg-shipping-settings'),
+                    urls: {$urls|json_encode:256},
+                    html: {
+                        spinner: '<i class="icon16 loading"></i>',
+                        state_error_hint: '<div class="red hint js-error-message">%message%</div>',
+                    }
+                });
+            }
+        );
     })(jQuery);
 </script>

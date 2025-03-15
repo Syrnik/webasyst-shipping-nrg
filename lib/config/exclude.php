@@ -53,5 +53,6 @@ return [
     '.editorconfig',
     'http/*',
     'phpstan.neon',
-    '*/phpstan.neon'
+    '*/phpstan.neon',
+    '*/tests/*',
 ];

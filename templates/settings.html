@@ -73,20 +73,4 @@
             });
         });
     })(jQuery);
-    {*
-    $(function () {
-        $('#ws-plugin-nrg-shipping-settings')
-                .off()
-                .on('click', '.tabs a', function () {
-                    var $this = $(this), $tab_content = $('.tab-content', '#ws-plugin-nrg-shipping-settings');
-                    var $tabs = $this.closest('ul.tabs');
-                    if (!$this.closest('li').hasClass('selected')) {
-                        $('li', $tabs).removeClass('selected');
-                        $this.closest('li').addClass('selected');
-                        $('.tab', $tab_content).hide();
-                        $('#ws-plugin-nrg-' + $this.data('tab') + '-tab').show();
-                    }
-                })
-    });
-    *}
 </script>

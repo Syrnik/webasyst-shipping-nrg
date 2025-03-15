@@ -1,14 +1,14 @@
 <div id="ws-plugin-nrg-shipping-settings">
-    <ul class="tabs">
+    <ul class="tabs js-tabs">
         <li class="selected"><a href="javascript:void(0)" data-tab="main">Настройки</a></li>
         <li><a href="javascript:void(0)" data-tab="about">Помощь</a></li>
     </ul>
-    <div class="tab-content">
-        <div id="ws-plugin-nrg-main-tab" class="block tab">
+    <div class="tab-content js-tabs-content-container">
+        <div id="ws-plugin-nrg-main-tab" class="block tab js-tab-content js-fields-tab">
             <h2>Настройки</h2>
             {foreach $controls.main as $gc}{$gc}{/foreach}
         </div>
-        <div id="ws-plugin-nrg-about-tab" class="hidden block tab">
+        <div id="ws-plugin-nrg-about-tab" class="hidden block tab js-tab-content">
             <h2>Помощь</h2>
             <h3>Расчет стоимости доставки ТК &laquo;Энергия&raquo;</h3>
             <p>Версия {$info.version}<br>
@@ -50,84 +50,47 @@
         </div>
     </div>
 </div>
-<style type="text/css">
-    #ws-plugin-nrg-shipping-settings .error {
-        background-color: mistyrose;
-        border:1px solid tomato;
-        color: firebrick;
-    }
-    #ws-plugin-nrg-shipping-settings .tab-content {
-        border: 1px solid #ddd;
-        box-sizing: border-box;
-    }
-    #ws-plugin-nrg-about-tab .about {
-        text-align: center;
-        padding: 1em;
-        background-color: mintcream;
-        border: 1px solid mediumseagreen;
-        width: 50%;
-        max-width: 700px;
-        margin: 0 auto;
-    }
-    #ws-plugin-nrg-shipping-settings dl {
-        line-height: 1.3;
-        font-family: "DejaVu Serif", Georgia, Times, serif;
-        font-size: 16px;
-    }
-    #ws-plugin-nrg-shipping-settings dt {
-        font-weight: bold;
-        margin-left: 1.5em;
-        display: block;
-    }
-    #ws-plugin-nrg-shipping-settings dt:before {
-        content: "Q: ";
-        margin-left: -1.5em;
-    }
-    #ws-plugin-nrg-shipping-settings dd {
-        margin: 0 0 1em 1.5em;
-        display: block;
-    }
-    #ws-plugin-nrg-shipping-settings dd:before {
-        content: "A: ";
-        margin-left: -1.5em;
-        font-weight: bold;
-    }
-
-    #ws-plugin-nrg-shipping-settings var {
-        font-family: monospace;
-        font-style: italic;
-    }
-
-    #ws-plugin-nrg-shipping-settings code {
-        font-family: monospace;
-        background-color: lavenderblush;
-        color:darkred;
-        padding-left: 0.5em;
-        padding-right: 0.5em;
-    }
-
-    #ws-plugin-nrg-shipping-settings pre {
-        display: block;
-        padding: 0.5em;
-        background-color: ghostwhite;
-        color:darkred;
-        border: 1px solid gainsboro;
-        box-shadow: 2px 2px 4px 1px rgba(0,0,0,0.07);
-    }
-</style>
 <script type="text/javascript">
-    $(function () {
-        $('#ws-plugin-nrg-shipping-settings')
-                .off()
-                .on('click', '.tabs a', function () {
-                    var $this = $(this), $tab_content = $('.tab-content', '#ws-plugin-nrg-shipping-settings');
-                    var $tabs = $this.closest('ul.tabs');
-                    if (!$this.closest('li').hasClass('selected')) {
-                        $('li', $tabs).removeClass('selected');
-                        $this.closest('li').addClass('selected');
-                        $('.tab', $tab_content).hide();
-                        $('#ws-plugin-nrg-' + $this.data('tab') + '-tab').show();
+    (function ($) {
+        Promise.all([
+            new Promise((resolve, reject) => {
+                const url = '{$wa_static_url}wa-plugins/shipping/nrg/js/settings.js?v={$info.version}';
+                if (document.getElementById('nrg-shipping-settings-js')) {
+                    resolve(url);
+                } else {
+                    const element = document.createElement('script');
+                    element.src = url;
+                    element.id = 'nrg-shipping-settings-js';
+                    document.head.append(element)
+                    element.onload = () => resolve(url);
+                    {literal}element.onerror = () => reject(new Error(`Ошибка загрузки скрипта ${url}`));{/literal}
+                }
+            }),
+            new Promise((resolve, reject) => {
+                const url = '{$wa_static_url}wa-plugins/shipping/nrg/css/settings-legacy.css?v={$info.version}';
+                if (document.getElementById('nrg-shipping-settings-legacy-css')) resolve(url);
+                else {
+                    const element = document.createElement('link');
+                    element.rel = "stylesheet";
+                    element.type = "text/css";
+                    element.id = "nrg-shipping-settings-legacy-css";
+                    element.href = url;
+                    document.head.append(element);
+                    element.onload = () => resolve(url);
+                    element.onerror = () => reject(new Error("Ошибка загрузки таблицы стилей"));
+                }
+            })
+        ]).then(
+            () => {
+                new nrgShippingSettings({
+                    $wrapper: $('#ws-plugin-nrg-shipping-settings'),
+                    urls: {$urls|json_encode:256},
+                    html: {
+                        spinner: '<i class="icon16 loading"></i>',
+                        state_error_hint: '<div class="red hint js-error-message">%message%</div>',
                     }
-                })
-    });
+                });
+            }
+        );
+    })(jQuery);
 </script>

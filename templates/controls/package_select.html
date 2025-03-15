@@ -13,7 +13,7 @@
         <input type="hidden" name="{$namespace|escape}[{$value@index}][package]" value="{$value.package|escape}">{/foreach}
 {else}
 <div {if $is_ui2}class="box" {else}class="block padding" style="padding-left: 0"{/if} id="{$params.id}">
-    <table class="zebra">
+    <table class="zebra" {if !$is_ui2}style="width: max-content"{/if}>
         <thead>
         <tr class="white">
             <th colspan="2">Вес отправления</th>
@@ -42,8 +42,10 @@
                 <td class="min-width">от</td>
                 <td class="nowrap">
                     <input type="number"
+                           required
+                           min="0"
                            step="0.01"
-                           class="shortest"
+                           class="{if $is_ui2}shortest{else}short numerical{/if}"
                            name="{$namespace|escape}[{$value@index}][min_weight]"
                            value="{$value.min_weight|escape}">&nbsp;кг.
                 </td>
@@ -76,8 +78,8 @@
 
                         $input.attr(
                             'name',
-                            name.replace(/\[standard_parcel_dimensions]\[(\d+)]/, (str, p1) =>  '[standard_parcel_dimensions][' + (parseInt(p1, 10) + 1) + ']'
-                            );
+                            name.replace(/\[standard_parcel_dimensions]\[(\d+)]/, (str, p1) =>  '[standard_parcel_dimensions][' + (parseInt(p1, 10) + 1) + ']')
+                        );
                         $input.val('');
                     });
                     $last.after($clone);

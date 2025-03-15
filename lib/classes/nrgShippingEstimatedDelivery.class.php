@@ -1,25 +1,17 @@
 <?php
 /**
  * @author Serge Rodovnichenko <serge@syrnik.com>
- * @copyright Serge Rodovnichenko, 2019
+ * @copyright Serge Rodovnichenko, 2019-2025
  * @license Webasyst
  */
 
 declare(strict_types=1);
 
-namespace Syrnik\nrgShipping;
-
-use DateInterval;
-use DateTimeImmutable;
-use Exception;
-use waDateTime;
-use waException;
-
 /**
  * Class EstimatedDelivery
  * @package Syrnik\nrgShipping
  */
-class EstimatedDelivery
+class nrgShippingEstimatedDelivery
 {
     protected int $MinDays = 0;
 
@@ -55,7 +47,7 @@ class EstimatedDelivery
      * @param string $delimiter
      * @return $this
      */
-    public function parseRange(string $range, string $delimiter = '-'): EstimatedDelivery
+    public function parseRange(string $range, string $delimiter = '-'): nrgShippingEstimatedDelivery
     {
         $range = explode($delimiter, $range, 2);
         $_range[] = (int)trim(ifset($range, '0', 0));
@@ -78,7 +70,7 @@ class EstimatedDelivery
      * @return $this
      * @throws waException
      */
-    public function parseRegexRange($range): EstimatedDelivery
+    public function parseRegexRange($range): nrgShippingEstimatedDelivery
     {
         $matches = [];
         $_range = [0, 0];
@@ -110,9 +102,9 @@ class EstimatedDelivery
 
     /**
      * @param int $MinDays
-     * @return EstimatedDelivery
+     * @return nrgShippingEstimatedDelivery
      */
-    public function setMinDays(int $MinDays): EstimatedDelivery
+    public function setMinDays(int $MinDays): nrgShippingEstimatedDelivery
     {
         $this->MinDays = $MinDays;
         return $this;
@@ -128,9 +120,9 @@ class EstimatedDelivery
 
     /**
      * @param int $MaxDays
-     * @return EstimatedDelivery
+     * @return nrgShippingEstimatedDelivery
      */
-    public function setMaxDays(int $MaxDays): EstimatedDelivery
+    public function setMaxDays(int $MaxDays): nrgShippingEstimatedDelivery
     {
         $this->MaxDays = $MaxDays;
         return $this;
@@ -156,9 +148,9 @@ class EstimatedDelivery
 
     /**
      * @param DateTimeImmutable $Departure
-     * @return EstimatedDelivery
+     * @return nrgShippingEstimatedDelivery
      */
-    public function setDeparture(DateTimeImmutable $Departure): EstimatedDelivery
+    public function setDeparture(DateTimeImmutable $Departure): nrgShippingEstimatedDelivery
     {
         $this->Departure = $Departure;
         return $this;
@@ -169,7 +161,7 @@ class EstimatedDelivery
      * @param string $format
      * @return $this
      */
-    public function setDepartureString(string $departure, string $format = 'Y-m-d H:i:s'): EstimatedDelivery
+    public function setDepartureString(string $departure, string $format = 'Y-m-d H:i:s'): nrgShippingEstimatedDelivery
     {
         if ($format) {
             $_departure = date_create_immutable_from_format($format, $departure);

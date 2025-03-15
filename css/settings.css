@@ -1,0 +1,9 @@
+#ws-plugin-nrg-shipping-settings input,
+#ws-plugin-nrg-shipping-settings select,
+#ws-plugin-nrg-shipping-settings textarea {
+  font-weight: normal;
+}
+#ws-plugin-nrg-shipping-settings input[type="text"]:invalid,
+#ws-plugin-nrg-shipping-settings input[type="number"]:invalid {
+  border-color: var(--red) !important;
+}

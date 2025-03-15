@@ -10,15 +10,6 @@
         'dev' => true,
     ),
     'versions' => array(
-        'serger/cake-utility' => array(
-            'pretty_version' => 'v1.0.4',
-            'version' => '1.0.4.0',
-            'reference' => '02f9c1200097ee1b4b2db2dcf17a608e4671c7f6',
-            'type' => 'library',
-            'install_path' => __DIR__ . '/../serger/cake-utility',
-            'aliases' => array(),
-            'dev_requirement' => false,
-        ),
         'serger/eval-math' => array(
             'pretty_version' => 'v2.0.3',
             'version' => '2.0.3.0',

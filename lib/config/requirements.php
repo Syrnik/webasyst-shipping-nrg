@@ -7,11 +7,7 @@
  * @package nrg
  */
 
-return array(
-    'php'           => array(
-        'version' => '>=7.2.0', 'strict' => true
-    ),
-    'app.installer' => array(
-        'version' => 'latest', 'strict' => true
-    )
-);
+return [
+    'php'           => ['version' => '>=7.4.0', 'strict' => true],
+    'app.installer' => ['version' => 'latest', 'strict' => true]
+];

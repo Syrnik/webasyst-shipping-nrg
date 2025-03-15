@@ -2,27 +2,36 @@
     "packages": [
         {
             "name": "serger/cake-utility",
-            "version": "v1.0.0",
-            "version_normalized": "1.0.0.0",
+            "version": "v1.0.4",
+            "version_normalized": "1.0.4.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/SergeR/cake-utils.git",
-                "reference": "c7d6554c08f1d93be9f3f4b1c5cae10733558d42"
+                "reference": "02f9c1200097ee1b4b2db2dcf17a608e4671c7f6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/SergeR/cake-utils/zipball/c7d6554c08f1d93be9f3f4b1c5cae10733558d42",
-                "reference": "c7d6554c08f1d93be9f3f4b1c5cae10733558d42",
+                "url": "https://api.github.com/repos/SergeR/cake-utils/zipball/02f9c1200097ee1b4b2db2dcf17a608e4671c7f6",
+                "reference": "02f9c1200097ee1b4b2db2dcf17a608e4671c7f6",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.6.0"
             },
+            "require-dev": {
+                "phpunit/phpunit": "^9",
+                "rector/rector": "^2.0",
+                "vimeo/psalm": ">=5.9.0"
+            },
             "suggest": {
+                "ext-ctype": "To use Text::parseFileSize()",
+                "ext-dom": "To use Xml",
                 "ext-intl": "To use Text::transliterate() or Text::slug()",
+                "ext-libxml": "To use Xml",
+                "ext-simplexml": "To use Xml",
                 "lib-ICU": "To use Text::transliterate() or Text::slug()"
             },
-            "time": "2019-04-04T22:17:46+00:00",
+            "time": "2025-01-25T09:33:28+00:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {
@@ -46,21 +55,25 @@
                 "inflector",
                 "string"
             ],
+            "support": {
+                "issues": "https://github.com/SergeR/cake-utils/issues",
+                "source": "https://github.com/SergeR/cake-utils/tree/v1.0.4"
+            },
             "install-path": "../serger/cake-utility"
         },
         {
             "name": "serger/eval-math",
-            "version": "2.0.2",
-            "version_normalized": "2.0.2.0",
+            "version": "v2.0.3",
+            "version_normalized": "2.0.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/SergeR/eval-math.git",
-                "reference": "a9eae61df21bd19f693f78261f40a705f0551232"
+                "reference": "ce8d7503de4cbff339be33d5bb8bd6f589988b39"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/SergeR/eval-math/zipball/a9eae61df21bd19f693f78261f40a705f0551232",
-                "reference": "a9eae61df21bd19f693f78261f40a705f0551232",
+                "url": "https://api.github.com/repos/SergeR/eval-math/zipball/ce8d7503de4cbff339be33d5bb8bd6f589988b39",
+                "reference": "ce8d7503de4cbff339be33d5bb8bd6f589988b39",
                 "shasum": ""
             },
             "require": {
@@ -70,7 +83,7 @@
                 "php-coveralls/php-coveralls": "^2",
                 "phpunit/phpunit": "^5"
             },
-            "time": "2023-01-08T10:39:51+00:00",
+            "time": "2023-11-29T12:41:49+00:00",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -92,23 +105,23 @@
                 "EvalMath"
             ],
             "support": {
-                "source": "https://github.com/SergeR/eval-math/tree/2.0.2"
+                "source": "https://github.com/SergeR/eval-math/tree/v2.0.3"
             },
             "install-path": "../serger/eval-math"
         },
         {
             "name": "syrnik/wa-shipping-utils",
-            "version": "2.0.0",
-            "version_normalized": "2.0.0.0",
+            "version": "2.0.2",
+            "version_normalized": "2.0.2.0",
             "source": {
                 "type": "git",
                 "url": "https://gitlab.com/sergerod/wa-shipping-utils.git",
-                "reference": "da8337d3bbbe1ae4072dc204c41e033f144a84ab"
+                "reference": "80da76cb0f8cdc4582f6be3a5230f352286116d4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=da8337d3bbbe1ae4072dc204c41e033f144a84ab",
-                "reference": "da8337d3bbbe1ae4072dc204c41e033f144a84ab",
+                "url": "https://gitlab.com/api/v4/projects/sergerod%2Fwa-shipping-utils/repository/archive.zip?sha=80da76cb0f8cdc4582f6be3a5230f352286116d4",
+                "reference": "80da76cb0f8cdc4582f6be3a5230f352286116d4",
                 "shasum": ""
             },
             "require": {
@@ -119,7 +132,7 @@
             "require-dev": {
                 "phpunit/phpunit": "^8"
             },
-            "time": "2023-01-08T05:14:25+03:00",
+            "time": "2024-01-23T00:08:24+03:00",
             "type": "library",
             "installation-source": "dist",
             "autoload": {

@@ -10,6 +10,7 @@
  * @copyright     Copyright (c) Cake Software Foundation, Inc. (https://cakefoundation.org)
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
+
 namespace SergeR\CakeUtility;
 
 use InvalidArgumentException;
@@ -24,7 +25,7 @@ class Text
     /**
      * Default transliterator.
      *
-     * @var Transliterator Transliterator instance.
+     * @var Transliterator|null Transliterator instance.
      */
     protected static $_defaultTransliterator;
 
@@ -90,7 +91,7 @@ class Text
      * @param string $separator The token to split the data on.
      * @param string $leftBound The left boundary to ignore separators in.
      * @param string $rightBound The right boundary to ignore separators in.
-     * @return array|string Array of tokens in $data or original input if empty.
+     * @return array Array of tokens in $data or original input if empty.
      */
     public static function tokenize($data, $separator = ',', $leftBound = '(', $rightBound = ')')
     {
@@ -118,7 +119,10 @@ class Text
                 }
             }
             if ($tmpOffset !== -1) {
+                /** @psalm-suppress PossiblyFalseOperand */
                 $buffer .= mb_substr($data, $offset, $tmpOffset - $offset);
+
+                /** @psalm-suppress PossiblyFalseArgument */
                 $char = mb_substr($data, $tmpOffset, 1);
                 if (!$depth && $char === $separator) {
                     $results[] = $buffer;
@@ -144,6 +148,7 @@ class Text
                         }
                     }
                 }
+                /** @psalm-suppress PossiblyFalseOperand */
                 $tmpOffset += 1;
                 $offset = $tmpOffset;
             } else {
@@ -186,14 +191,13 @@ class Text
      * @param array $options An array of options, see description above
      * @return string
      */
-    public static function insert($str, $data, array $options = [])
+    public static function insert($str, array $data, array $options = [])
     {
         $defaults = [
             'before' => ':', 'after' => null, 'escape' => '\\', 'format' => null, 'clean' => false
         ];
         $options += $defaults;
         $format = $options['format'];
-        $data = (array)$data;
         if (empty($data)) {
             return $options['clean'] ? static::cleanInsert($str, $options) : $str;
         }
@@ -202,8 +206,8 @@ class Text
             $format = sprintf(
                 '/(?<!%s)%s%%s%s/',
                 preg_quote($options['escape'], '/'),
-                str_replace('%', '%%', preg_quote($options['before'], '/')),
-                str_replace('%', '%%', preg_quote($options['after'], '/'))
+                str_replace('%', '%%', preg_quote((string)$options['before'], '/')),
+                str_replace('%', '%%', preg_quote((string)$options['after'], '/'))
             );
         }
 
@@ -219,7 +223,10 @@ class Text
         }
 
         $dataKeys = array_keys($data);
-        $hashKeys = array_map('crc32', $dataKeys);
+        $crc32b = function ($val) {
+            return hash('crc32b', $val);
+        };
+        $hashKeys = array_map($crc32b, $dataKeys);
         $tempData = array_combine($dataKeys, $hashKeys);
         krsort($tempData);
 
@@ -266,8 +273,8 @@ class Text
         switch ($clean['method']) {
             case 'html':
                 $clean += [
-                    'word' => '[\w,.]+',
-                    'andText' => true,
+                    'word'        => '[\w,.]+',
+                    'andText'     => true,
                     'replacement' => '',
                 ];
                 $kleenex = sprintf(
@@ -284,8 +291,8 @@ class Text
                 break;
             case 'text':
                 $clean += [
-                    'word' => '[\w,.]+',
-                    'gap' => '[\s]*(?:(?:and|or)[\s]*)?',
+                    'word'        => '[\w,.]+',
+                    'gap'         => '[\s]*(?:(?:and|or)[\s]*)?',
                     'replacement' => '',
                 ];
 
@@ -406,9 +413,11 @@ class Text
      * @param string $break The line is broken using the optional break parameter. Defaults to '\n'.
      * @param bool $cut If the cut is set to true, the string is always wrapped at the specified width.
      * @return string Formatted text.
+     *
      */
     public static function wordWrap($text, $width = 72, $break = "\n", $cut = false)
     {
+        /** @psalm-suppress ArgumentTypeCoercion */
         $paragraphs = explode($break, $text);
         foreach ($paragraphs as &$paragraph) {
             $paragraph = static::_wordWrap($paragraph, $width, $break, $cut);
@@ -480,7 +489,7 @@ class Text
      * - `limit` A limit, optional, defaults to -1 (none)
      *
      * @param string $text Text to search the phrase in.
-     * @param string|array $phrase The phrase or phrases that will be searched.
+     * @param array|string $phrase The phrase or phrases that will be searched.
      * @param array $options An array of HTML attributes and options.
      * @return string The highlighted text
      */
@@ -492,9 +501,9 @@ class Text
 
         $defaults = [
             'format' => '<span class="highlight">\1</span>',
-            'html' => false,
-            'regex' => '|%s|iu',
-            'limit' => -1,
+            'html'   => false,
+            'regex'  => '|%s|iu',
+            'limit'  => -1,
         ];
         $options += $defaults;
 
@@ -742,7 +751,7 @@ class Text
      *
      * @param string $text The input string.
      * @param int $start The position to begin extracting.
-     * @param int $length The desired length.
+     * @param int|null $length The desired length.
      * @param array $options An array of options.
      * @return string
      */
@@ -837,7 +846,7 @@ class Text
         $spacepos = mb_strrpos($text, ' ');
 
         if ($spacepos !== false) {
-            $lastWord = mb_strrpos($text, $spacepos);
+            $lastWord = mb_substr($text, $spacepos);
 
             // Some languages are written without word separation.
             // We recognize a string as a word if it doesn't contain any full-width characters.
@@ -909,7 +918,7 @@ class Text
             $and = 'and';
         }
         if (count($list) > 1) {
-            return implode($separator, array_slice($list, null, -1)) . ' ' . $and . ' ' . array_pop($list);
+            return implode($separator, array_slice($list, 0, -1)) . ' ' . $and . ' ' . array_pop($list);
         }
 
         return array_pop($list);
@@ -1027,7 +1036,7 @@ class Text
         if ($i !== false) {
             $size = (float)substr($size, 0, $l);
 
-            return $size * pow(1024, $i + 1);
+            return $size * 1024 ** ($i + 1);
         }
 
         if (substr($size, -1) === 'B' && ctype_digit(substr($size, 0, -1))) {
@@ -1057,11 +1066,11 @@ class Text
     /**
      * Set the default transliterator.
      *
-     * @param Transliterator $transliterator A `Transliterator` instance.
+     * @param Transliterator|null $transliterator A `Transliterator` instance.
      * @return void
      * @since 3.7.0
      */
-    public static function setTransliterator(Transliterator $transliterator)
+    public static function setTransliterator($transliterator)
     {
         static::$_defaultTransliterator = $transliterator;
     }
@@ -1092,7 +1101,7 @@ class Text
      * Transliterate string.
      *
      * @param string $string String to transliterate.
-     * @param Transliterator|string|null $transliterator Either a Transliterator
+     * @param string|Transliterator|null $transliterator Either a Transliterator
      *   instance, or a transliterator identifier string. If `null`, the default
      *   transliterator (identifier) set via `setTransliteratorId()` or
      *   `setTransliterator()` will be used.
@@ -1123,7 +1132,7 @@ class Text
      *   For e.g. this option can be set to '.' to generate clean file names.
      *
      * @param string $string the string you want to slug
-     * @param array $options If string it will be use as replacement character
+     * @param array|string $options If string it will be use as replacement character
      *   or an array of options.
      * @return string
      * @see setTransliterator()
@@ -1135,9 +1144,9 @@ class Text
             $options = ['replacement' => $options];
         }
         $options += [
-            'replacement' => '-',
+            'replacement'      => '-',
             'transliteratorId' => null,
-            'preserve' => null
+            'preserve'         => null
         ];
 
         if ($options['transliteratorId'] !== false) {
@@ -1150,8 +1159,8 @@ class Text
         }
         $quotedReplacement = preg_quote($options['replacement'], '/');
         $map = [
-            '/[' . $regex . ']/mu' => ' ',
-            '/[\s]+/mu' => $options['replacement'],
+            '/[' . $regex . ']/mu'                                             => ' ',
+            '/[\s]+/mu'                                                        => $options['replacement'],
             sprintf('/^[%s]+|[%s]+$/', $quotedReplacement, $quotedReplacement) => '',
         ];
         $string = preg_replace(array_keys($map), $map, $string);

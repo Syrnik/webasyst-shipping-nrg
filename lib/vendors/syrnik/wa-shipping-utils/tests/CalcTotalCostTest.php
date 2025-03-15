@@ -5,6 +5,8 @@
  * @license Webasyst
  */
 
+declare(strict_types=1);
+
 namespace Syrnik\WaShippingUtils\Tests;
 
 use PHPUnit\Framework\TestCase;
@@ -54,8 +56,20 @@ class CalcTotalCostTest extends TestCase
             [['carrier_cost'=>100, 'total_price'=>1000, 'total_raw_price'=>2000, 'handling_cost'=>'s+(s+y)*0.05', 'handling_base'=>'formula', 'free'=>''], 205],
             [['carrier_cost'=>100, 'total_price'=>1000, 'total_raw_price'=>2000, 'handling_cost'=>'S+(s+Y)*0.05', 'handling_base'=>'formula', 'free'=>''], 205],
             [['carrier_cost'=>100, 'total_price'=>1000, 'total_raw_price'=>2000, 'handling_cost'=>'s-300', 'handling_base'=>'formula', 'free'=>''], 0],
-            [['carrier_cost'=>100, 'total_price'=>1000, 'total_raw_price'=>2000, 'handling_cost'=>'-500', 'handling_base'=>'formula', 'free'=>''], 0]
+            [['carrier_cost'=>100, 'total_price'=>1000, 'total_raw_price'=>2000, 'handling_cost'=>'-500', 'handling_base'=>'formula', 'free'=>''], 0],
+            [['carrier_cost'=>100, 'total_price'=>1000, 'total_raw_price'=>2000, 'handling_cost'=>'100', 'handling_base'=>'formula', 'free'=>''], 100],
+            [['carrier_cost'=>322.29, 'total_price'=>57, 'total_raw_price'=>57, 'handling_cost'=>'20+0.1*S+0.005*Y', 'handling_base'=>'formula', 'free'=>''], 52.51],
         ];
+    }
+
+    public function testEmptyFormula()
+    {
+        $result = WaShippingUtils::calcTotalCost(100, 1000, 2000, '0', 'formula', '');
+        $this->assertEquals(0, $result);
+
+        $result = WaShippingUtils::calcTotalCost(100, 1000, 2000, '', 'formula', '');
+        $this->assertEquals(100, $result);
+
     }
 
     public function testFormulaExceptions()

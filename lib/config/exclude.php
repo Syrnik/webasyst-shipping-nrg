@@ -1,5 +1,10 @@
 <?php
-return array(
+return [
+    '*/README.md',
+    '*/LICENSE.txt',
+    '*/CHANGELOG.md',
+    '*/CONTRIBUTING.md',
+    '*/contributors.txt',
     'README.md',
     'CHANGELOG.md',
     'CONTRIBUTING.md',
@@ -30,10 +35,23 @@ return array(
     'composer.json',
     'composer.lock',
     '.travis.yml',
+    '*/.travis.yml',
     '.gitlab-ci.yml',
     'lib/vendors/*/ci-gitlab/*',
     'lib/vendors/bin',
     'lib/vendors/jms/metadata/tests/Metadata/Tests',
-    '.editorconfig',
+    'public/*',
+    '.couscous/*',
+    'docs/*',
+    '*/composer.lock',
+    '*/composer.json',
+    '*/*.xml.dist',
+    '*/psalm.xml',
+    'rector.php',
+    '*/rector.php',
     '*/.editorconfig',
-);
+    '.editorconfig',
+    'http/*',
+    'phpstan.neon',
+    '*/phpstan.neon'
+];

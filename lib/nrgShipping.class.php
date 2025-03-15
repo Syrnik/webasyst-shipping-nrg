@@ -1,7 +1,7 @@
 <?php
 /**
  * @author Serge Rodovnichenko <serge@syrnik.com>
- * @copyright Serge Rodovnichenko, 2015-2019
+ * @copyright Serge Rodovnichenko, 2015-2025
  * @license http://www.webasyst.com/terms/#eula Webasyst
  */
 
@@ -38,16 +38,18 @@ class nrgShipping extends waShipping
     /**
      * @return array
      */
-    public function allowedAddress()
+    public function allowedAddress(): array
     {
-        return array(array('country' => 'rus'));
+        return [
+            ['country' => 'rus']
+        ];
     }
 
     /**
      *
      * @return string ISO3 currency code or array of ISO3 codes
      */
-    public function allowedCurrency()
+    public function allowedCurrency(): string
     {
         return 'RUB';
     }
@@ -56,7 +58,7 @@ class nrgShipping extends waShipping
      *
      * @return string Weight units or array of weight units
      */
-    public function allowedWeightUnit()
+    public function allowedWeightUnit(): string
     {
         return 'kg';
     }
@@ -64,7 +66,7 @@ class nrgShipping extends waShipping
     /**
      * @return string
      */
-    public function allowedLinearUnit()
+    public function allowedLinearUnit(): string
     {
         return 'm';
     }
@@ -76,12 +78,12 @@ class nrgShipping extends waShipping
      * @throws waException
      * @throws Exception
      */
-    public function getSettingsHTML($params = array())
+    public function getSettingsHTML($params = []): string
     {
         $view = wa()->getView();
-        if (!version_compare(PHP_VERSION, '7.2.0', '>=')) {
+        if (!version_compare(PHP_VERSION, '7.4.0', '>=')) {
             $view->assign('errors', array(
-                sprintf('Критическая ошибка. Требуется версия PHP 7.2.0 или старше. Сейчас используется %s. Работа плагина невозможна', PHP_VERSION)
+                sprintf('Критическая ошибка. Требуется версия PHP 7.4.0 или старше. Сейчас используется %s. Работа плагина невозможна', PHP_VERSION)
             ));
             return $view->fetch($this->path . '/templates/settings.html');
         }
@@ -134,7 +136,7 @@ class nrgShipping extends waShipping
      * @return bool
      * @throws waException
      */
-    public function isAllowedAddress($address = array())
+    public function isAllowedAddress($address = []): bool
     {
         $allowed = parent::isAllowedAddress($address);
 
@@ -159,7 +161,7 @@ class nrgShipping extends waShipping
             return $allowed;
         }
 
-        $net = new waNet(array('format' => waNet::FORMAT_JSON, 'verify' => false));
+        $net = new waNet(['format' => waNet::FORMAT_JSON, 'verify' => false]);
         try {
             $target_city = $net->query('https://api2.nrg-tk.ru/v2/search/city?' . http_build_query(['zipCode' => $zip]));
         } catch (waException $e) {

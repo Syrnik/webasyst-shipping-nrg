@@ -1,6 +1,7 @@
 {
   "name": "syrnik/shipping-nrg",
   "license": "proprietary",
+  "version": "2.0.0",
   "authors": [
     {
       "name": "Serge Rodovnichenko",
@@ -10,7 +11,7 @@
   "config": {
     "vendor-dir": "lib/vendors",
     "platform": {
-      "php": "7.2.0"
+      "php": "7.4.0"
     },
     "secure-http": false
   },

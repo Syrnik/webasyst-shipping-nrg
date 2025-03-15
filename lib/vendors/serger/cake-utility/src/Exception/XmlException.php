@@ -10,6 +10,7 @@
  * @since         3.0.0
  * @license       https://opensource.org/licenses/mit-license.php MIT License
  */
+
 namespace SergeR\CakeUtility\Exception;
 
 use \Exception;
@@ -20,9 +21,4 @@ use \Exception;
  */
 class XmlException extends Exception
 {
-
-    /**
-     * {@inheritDoc}
-     */
-    protected $_defaultCode = 0;
 }

@@ -18,9 +18,9 @@
 			"SergeR\\Util\\EvalMath\\" : "src/"
 		}
 	},
-    "extra": {
-        "branch-alias": {
-            "dev-master": "2.x-dev"
-        }
-    }
+	"extra": {
+		"branch-alias": {
+			"dev-master": "2.x-dev"
+		}
+	}
 }

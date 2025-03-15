@@ -50,8 +50,8 @@ class nrgShippingEstimatedDelivery
     public function parseRange(string $range, string $delimiter = '-'): nrgShippingEstimatedDelivery
     {
         $range = explode($delimiter, $range, 2);
-        $_range[] = (int)trim(ifset($range, '0', 0));
-        $_range[] = (int)trim(ifset($range, '1', 0));
+        $_range[] = (int)trim((string)ifset($range, '0', '0'));
+        $_range[] = (int)trim((string)ifset($range, '1', '0'));
 
         $this->setMinDays(min($_range));
         $this->setMaxDays(max($_range));
@@ -226,7 +226,7 @@ class nrgShippingEstimatedDelivery
     public function getWebasystShippingParams(string $format = 'humandate'): array
     {
         return array(
-            'est_delivery'  => $this->getWebasystEstDelivery($format),
+            'est_delivery' => $this->getWebasystEstDelivery($format),
             'delivery_date' => $this->getWebasystDeliveryDates()
         );
     }

@@ -26,8 +26,10 @@ use Syrnik\WaShippingUtils;
  * @property-read string $free_delivery_door
  * @property-read string $free_delivery_terminal
  */
-class nrgShipping extends waShipping
+final class nrgShipping extends waShipping
 {
+    private const DEFAULT_WEIGHT_KG = 0.1;
+
     /**
      * @var
      */
@@ -414,17 +416,17 @@ class nrgShipping extends waShipping
         // Что показывать в первую очередь
         $rates = $this->show_first == 'todoor' ? $to_door + $ware : $ware + $to_door;
 
-        return $rates ? $rates : array(array('rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна'));
+        return $rates ?: [['rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна']];
     }
 
     /**
      * @return float
      */
-    protected function getTotalWeight()
+    protected function getTotalWeight(): float
     {
-        $weight = WaShippingUtils::strToFloat(parent::getTotalWeight());
+        $weight = WaShippingUtils::toFloat(parent::getTotalWeight());
 
-        return $weight > 0 ? $weight : 0.1;
+        return $weight > 0 ? $weight : self::DEFAULT_WEIGHT_KG;
     }
 
     /**
@@ -504,10 +506,10 @@ class nrgShipping extends waShipping
      * @return float
      * @deprecated
      */
-    private function calcTotalCost($nrg_cost, $free_delivery = ''): float
+    private function calcTotalCost($nrg_cost, string $free_delivery = ''): float
     {
         $handling_base = $this->handling_base;
-        if (!trim($this->handling_cost) && $this->handling_base == 'formula') {
+        if (empty(trim($this->handling_cost)) && $this->handling_base == 'formula') {
             $handling_base = 'order';
         }
 

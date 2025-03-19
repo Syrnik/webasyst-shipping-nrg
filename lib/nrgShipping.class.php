@@ -280,7 +280,7 @@ final class nrgShipping extends waShipping
     }
 
     /**
-     * @return array|false|string
+     * @return array|string
      * @throws waException
      */
     protected function calculate()
@@ -293,7 +293,7 @@ final class nrgShipping extends waShipping
             return [['rate' => null, 'comment' => 'Расчет стоимости может быть выполнен только для доставки по России']];
         }
 
-        $zip = preg_replace('\D', '', $this->getAddress('zip'));
+        $zip = preg_replace('\D', '', trim((string)$this->getAddress('zip')));
         if (empty($zip)) {
             return array(['rate' => null, 'comment' => 'Не указан почтовый индекс города доставки']);
         }

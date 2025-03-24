@@ -55,4 +55,5 @@ return [
     'phpstan.neon',
     '*/phpstan.neon',
     '*/tests/*',
+    'http/*',
 ];

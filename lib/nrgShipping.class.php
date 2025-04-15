@@ -155,7 +155,7 @@ final class nrgShipping extends waShipping
         }
 
         // индекс должен быть 6 цифр
-        $zip = preg_replace('\D', '', (string)($address['zip'] ?? ''));
+        $zip = preg_replace('/\D/u', '', trim((string)($address['zip'] ?? '')));
         if (strlen($zip) !== 6) {
             return $allowed;
         }
@@ -293,7 +293,7 @@ final class nrgShipping extends waShipping
             return [['rate' => null, 'comment' => 'Расчет стоимости может быть выполнен только для доставки по России']];
         }
 
-        $zip = preg_replace('\D', '', trim((string)$this->getAddress('zip')));
+        $zip = preg_replace('/\D/u', '', trim((string)$this->getAddress('zip')));
         if (empty($zip)) {
             return array(['rate' => null, 'comment' => 'Не указан почтовый индекс города доставки']);
         }
@@ -302,7 +302,7 @@ final class nrgShipping extends waShipping
         }
 
         if ($this->zero_weight_item == 'stop' && $this->hasZeroWeightItems()) {
-            $msg = preg_replace('^[[:space:]]*([\s\S]*?)[[:space:]]*$', '\1', $this->zero_weight_item_msg);
+            $msg = preg_replace('/^[[:space:]]*([\s\S]*?)[[:space:]]*$/u', '\1', $this->zero_weight_item_msg);
             return empty($msg) ? 'Недоступно' : $msg;
         }
 

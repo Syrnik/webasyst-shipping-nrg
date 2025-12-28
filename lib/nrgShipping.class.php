@@ -33,7 +33,7 @@ final class nrgShipping extends waShipping
     /**
      * @var
      */
-    private $config;
+    private ?array $_config;
 
     /**
      * @return array
@@ -102,7 +102,7 @@ final class nrgShipping extends waShipping
         $params = array_merge($default, $params);
         $controls = [];
 
-        foreach ($this->config() as $name => $row) {
+        foreach ($this->_config() as $name => $row) {
             $row = array_merge($row, $params);
             $row['value'] = $this->getSettings($name);
             if (isset($options[$name])) {
@@ -527,14 +527,14 @@ final class nrgShipping extends waShipping
      * Чтение настроек из settings.php
      *
      */
-    private function config()
+    private function _config()
     {
-        if ($this->config === null) {
+        if ($this->_config === null) {
             $path = $this->path . '/lib/config/settings.php';
             if (file_exists($path)) {
-                $this->config = include($path);
+                $this->_config = include($path);
 
-                foreach ($this->config as & $config) {
+                foreach ($this->_config as & $config) {
                     if (isset($config['title'])) {
                         $config['title'] = $this->_w($config['title']);
                     }
@@ -544,11 +544,11 @@ final class nrgShipping extends waShipping
                 }
                 unset($config);
             }
-            if (!is_array($this->config)) {
-                $this->config = array();
+            if (!is_array($this->_config)) {
+                $this->_config = array();
             }
         }
-        return $this->config;
+        return $this->_config;
     }
 
     /**

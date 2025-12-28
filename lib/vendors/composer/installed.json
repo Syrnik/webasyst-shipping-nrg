@@ -102,6 +102,6 @@
             "install-path": "../syrnik/wa-shipping-utils"
         }
     ],
-    "dev": true,
+    "dev": false,
     "dev-package-names": []
 }

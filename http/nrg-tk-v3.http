@@ -1,0 +1,8 @@
+### GET request to example server
+GET https://mainapi.nrg-tk.ru/v3/search/city?zipCode=188800
+NrgApi-DevToken: {{nrg_api_key}}
+Accept: application/json
+
+<> 2025-05-25T125333.200.json
+<> 2025-03-26T220637.200.json
+###

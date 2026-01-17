@@ -1,0 +1,4 @@
+### Город по индексу
+GET https://api2.nrg-tk.ru/v2/search/city?zipCode=188801
+
+###

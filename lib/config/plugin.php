@@ -4,7 +4,7 @@ return array(
     'description'         => 'Расчет стоимости доставки транспортной компанией Энергия',
     'icon'                => 'img/nrg16.png',
     'logo'                => 'img/nrg.png',
-    'version'             => '2.0.2',
+    'version'             => '2.0.3',
     'vendor'              => '670917',
     'external'            => true,
     'services_by_type'    => true,

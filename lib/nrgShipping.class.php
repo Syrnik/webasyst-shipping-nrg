@@ -33,7 +33,7 @@ final class nrgShipping extends waShipping
     /**
      * @var
      */
-    private ?array $_config;
+    private ?array $_config = null;
 
     /**
      * @return array

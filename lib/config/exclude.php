@@ -62,5 +62,9 @@ return [
     'LICENSE',
     'LICENSE_ru',
     'compress-system-plugin.php',
+    'psalm74.xml',
+    'psalm85.xml',
+    'psalm-baseline.xml',
+    '.phpunit.result.cache',
     'src/*',
 ];

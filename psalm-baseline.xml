@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="6.16.1@f1f5de594dc76faf8784e02d3dc4716c91c6f6ac">
+  <file src="lib/actions/nrgShippingBackendCityByZip.controller.php">
+    <TypeDoesNotContainType>
+      <code><![CDATA[empty($this->plugin)]]></code>
+      <code><![CDATA[empty($this->plugin)]]></code>
+    </TypeDoesNotContainType>
+  </file>
+  <file src="lib/classes/nrgShippingEstimatedDelivery.class.php">
+    <InvalidArgument>
+      <code><![CDATA[$this->getMaxDateTime()->getTimestamp()]]></code>
+      <code><![CDATA[$this->getMinDateTime()->getTimestamp()]]></code>
+      <code><![CDATA[$this->getMinDateTime()->getTimestamp()]]></code>
+    </InvalidArgument>
+  </file>
+  <file src="lib/nrgShipping.class.php">
+    <InvalidArgument>
+      <code><![CDATA[[$this, 'settingPackageSelect']]]></code>
+    </InvalidArgument>
+    <InvalidOperand>
+      <code><![CDATA[$dimensions[$key] / 100]]></code>
+    </InvalidOperand>
+    <InvalidScalarArgument>
+      <code><![CDATA[$nrg_cost]]></code>
+    </InvalidScalarArgument>
+    <MoreSpecificImplementedParamType>
+      <code><![CDATA[$tracking_id]]></code>
+    </MoreSpecificImplementedParamType>
+    <RedundantCast>
+      <code><![CDATA[(string)$free_delivery]]></code>
+    </RedundantCast>
+    <TypeDoesNotContainType>
+      <code><![CDATA[WaShippingUtils::toFloat($item['weight']) === 0]]></code>
+    </TypeDoesNotContainType>
+    <UndefinedThisPropertyAssignment>
+      <code><![CDATA[$this->standard_parcel_dimensions]]></code>
+    </UndefinedThisPropertyAssignment>
+  </file>
+</files>

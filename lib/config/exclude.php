@@ -62,4 +62,5 @@ return [
     'LICENSE',
     'LICENSE_ru',
     'compress-system-plugin.php',
+    'src/*',
 ];

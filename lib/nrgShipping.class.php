@@ -44,6 +44,8 @@ final class nrgShipping extends waShipping
 
     private ?LoggerInterface $logger = null;
 
+    private ?nrgShippingEnergyAPI $energy_api = null;
+
     /**
      * @return array
      */
@@ -191,7 +193,7 @@ final class nrgShipping extends waShipping
             return $allowed;
         }
 
-        $my_city_code = $target_city['id'] ?? null;
+        $my_city_code = $target_city['city']['id'] ?? null;
         // неизвестный город
         if (empty($my_city_code) && $this->city_hide === 'always') {
             $this->getLogger()->info(
@@ -827,6 +829,19 @@ final class nrgShipping extends waShipping
      */
     public function getEnergyAPI(): nrgShippingEnergyAPI
     {
-        return new nrgShippingEnergyAPI($this->getLogger());
+        return $this->energy_api ?? new nrgShippingEnergyAPI($this->getLogger());
+    }
+
+    /**
+     * Подменяет клиент API (для тестов)
+     *
+     * @param nrgShippingEnergyAPI $api
+     * @return $this
+     */
+    public function setEnergyAPI(nrgShippingEnergyAPI $api): self
+    {
+        $this->energy_api = $api;
+
+        return $this;
     }
 }

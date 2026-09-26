@@ -10,7 +10,7 @@ declare(strict_types=1);
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 
-final class nrgShippingEnergyAPI
+class nrgShippingEnergyAPI
 {
     private const API_URL = 'https://api2.nrg-tk.pro/v2/';
 

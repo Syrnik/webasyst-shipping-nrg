@@ -5,11 +5,11 @@ end_of_line = lf
 insert_final_newline = true
 charset = utf-8
 trim_trailing_whitespace = true
-indent_style = space
+tab_width = 4
 
 [*.php]
 ij_php_align_multiline_array_initializer_expression = true
-ij_php_align_key_value_pairs = true
+ij_php_align_key_value_pairs = false
 ij_php_align_multiline_chained_methods = true
 
 [*.{js,vue}]

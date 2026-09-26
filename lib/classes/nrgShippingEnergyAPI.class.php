@@ -7,9 +7,22 @@
 
 declare(strict_types=1);
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
+
 final class nrgShippingEnergyAPI
 {
     private const API_URL = 'https://api2.nrg-tk.pro/v2/';
+
+    /** Сколько символов тела ответа писать в лог (ответы бывают огромными, например список городов) */
+    private const LOG_RESPONSE_LIMIT = 2000;
+
+    private LoggerInterface $logger;
+
+    public function __construct(?LoggerInterface $logger = null)
+    {
+        $this->logger = $logger ?? new NullLogger();
+    }
 
     /**
      * @param string $zip
@@ -59,7 +72,8 @@ final class nrgShippingEnergyAPI
     private function _get(string $path, array $params = [], array $headers = []): array
     {
         $net = new waNet(['expected_http_code' => [200, 400, 404, 500], 'verify' => false], $headers);
-        $net->query(self::API_URL . $path, $params);
+        $this->_query($net, self::API_URL . $path, $params, waNet::METHOD_GET);
+
         return $this->_parseResponse($net);
     }
 
@@ -75,9 +89,50 @@ final class nrgShippingEnergyAPI
     private function _post(string $path, array $params = [], array $headers = []): array
     {
         $net = new waNet(['expected_http_code' => [200, 400, 404, 500], 'request_format' => waNet::FORMAT_JSON, 'verify' => false], $headers);
-        $net->query(self::API_URL . $path, $params, waNet::METHOD_POST);
+        $this->_query($net, self::API_URL . $path, $params, waNet::METHOD_POST);
 
         return $this->_parseResponse($net);
+    }
+
+    /**
+     * Выполняет запрос, записывая в лог запрос, код и тело ответа (тело — усечённым)
+     *
+     * @param waNet $net
+     * @param string $url
+     * @param array $params
+     * @param string $method
+     * @return void
+     * @throws waException
+     * @throws waNetException
+     * @throws waNetTimeoutException
+     */
+    private function _query(waNet $net, string $url, array $params, string $method): void
+    {
+        $this->logger->info('API ТК «Энергия»: {method} {url}, параметры: {params}', [
+            'method' => $method,
+            'url'    => $url,
+            'params' => json_encode($params, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES),
+        ]);
+
+        try {
+            $net->query($url, $params, $method);
+        } catch (waException $e) {
+            $this->logger->error('API ТК «Энергия»: ошибка запроса {url} ({class}): {message}', [
+                'url'     => $url,
+                'class'   => get_class($e),
+                'message' => $e->getMessage(),
+            ]);
+            throw $e;
+        }
+
+        $response = (string)$net->getResponse(true);
+        if (mb_strlen($response) > self::LOG_RESPONSE_LIMIT) {
+            $response = mb_substr($response, 0, self::LOG_RESPONSE_LIMIT) . '… (обрезано, всего ' . strlen($response) . ' байт)';
+        }
+        $this->logger->info('API ТК «Энергия»: HTTP {code}, ответ: {response}', [
+            'code'     => $net->getResponseHeader('http_code'),
+            'response' => $response,
+        ]);
     }
 
     /**

@@ -8,4 +8,6 @@ $baseDir = dirname(dirname($vendorDir));
 return array(
     'Syrnik\\' => array($vendorDir . '/syrnik/wa-shipping-utils/src'),
     'SergeR\\Util\\EvalMath\\' => array($vendorDir . '/serger/eval-math/src'),
+    'SergeR\\' => array($vendorDir . '/serger/process-logger/src'),
+    'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
 );

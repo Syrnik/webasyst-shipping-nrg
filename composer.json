@@ -23,6 +23,8 @@
   ],
   "require": {
     "syrnik/wa-shipping-utils": "^2",
-    "serger/eval-math": "^2"
+    "serger/eval-math": "^2",
+    "serger/process-logger": "^1",
+    "psr/log": "^1"
   }
 }

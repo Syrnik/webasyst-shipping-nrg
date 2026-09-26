@@ -1,0 +1,25 @@
+{$is_ui2 = version_compare($wa->whichUI(), '2.0', '>=')}
+<div id="{$params.id|escape}">
+    {if $is_ui2}<div class="wa-select">{/if}
+    <select name="{$name|escape}[duration]" class="js-nrg-logging-duration">
+        {foreach $options as $value => $title}
+            <option value="{$value}"{if $value == $selected} selected{/if}>{$title|escape}</option>
+        {/foreach}
+    </select>
+    {if $is_ui2}</div>{/if}
+    {* Селект — разовая команда: окно логирования перевычисляется на сервере, только если селект изменили в этой сессии *}
+    <input type="hidden" name="{$name|escape}[touched]" value="0" class="js-nrg-logging-touched">
+    {if $logging_until}
+        <div class="hint{if $is_ui2} state-success{/if}" style="margin-top: 6px;{if !$is_ui2} color: #367c36;{/if}">
+            Логирование включено, выключится автоматически {$logging_until|wa_datetime:'humandatetime'}
+        </div>
+    {/if}
+</div>
+<script>
+    (function ($) {
+        const $wrapper = $('#' + {$params.id|json_encode});
+        $wrapper.find('.js-nrg-logging-duration').on('change', function () {
+            $wrapper.find('.js-nrg-logging-touched').val('1');
+        });
+    })(jQuery);
+</script>

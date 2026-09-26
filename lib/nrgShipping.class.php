@@ -5,6 +5,10 @@
  * @license http://www.webasyst.com/terms/#eula Webasyst
  */
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\LogLevel;
+use Psr\Log\NullLogger;
+use SergeR\ProcessLogger;
 use Syrnik\WaShippingUtils;
 
 /**
@@ -25,6 +29,9 @@ use Syrnik\WaShippingUtils;
  * @property string $city_hide
  * @property-read string $free_delivery_door
  * @property-read string $free_delivery_terminal
+ *
+ * @property-read int $logging_duration
+ * @property-read int $logging_until
  */
 final class nrgShipping extends waShipping
 {
@@ -34,6 +41,8 @@ final class nrgShipping extends waShipping
      * @var
      */
     private ?array $_config = null;
+
+    private ?LoggerInterface $logger = null;
 
     /**
      * @return array
@@ -151,6 +160,10 @@ final class nrgShipping extends waShipping
         $city_name = WaShippingUtils::replaceYo(WaShippingUtils::mb_trim(mb_strtolower((string)($address['city'] ?? ''))));
         $my_city = WaShippingUtils::replaceYo(WaShippingUtils::mb_trim(mb_strtolower($this->sender_city_name)));
         if ($city_name == $my_city) {
+            $this->getLogger()->info(
+                'Проверка адреса: город получателя «{city}» совпадает с городом отправителя, способ доставки скрыт',
+                ['city' => $city_name]
+            );
             return false;
         }
 
@@ -166,7 +179,12 @@ final class nrgShipping extends waShipping
                 throw new waException($target_city['error']['message'] ?? 'Доставка в город с указанным почтовым индексом невозможна');
             }
         } catch (waException $e) {
+            $this->getLogger()->warning(
+                'Проверка адреса: не удалось определить город по индексу {zip}: {message}',
+                ['zip' => $zip, 'message' => $e->getMessage()]
+            );
             if ($this->city_hide == 'always') {
+                $this->getLogger()->info('Проверка адреса: способ доставки скрыт (настройка «Любой недоступный город»)');
                 return false;
             }
 
@@ -176,10 +194,22 @@ final class nrgShipping extends waShipping
         $my_city_code = $target_city['id'] ?? null;
         // неизвестный город
         if (empty($my_city_code) && $this->city_hide === 'always') {
+            $this->getLogger()->info(
+                'Проверка адреса: город по индексу {zip} не найден, способ доставки скрыт (настройка «Любой недоступный город»)',
+                ['zip' => $zip]
+            );
             return false;
         }
 
-        return (int)$my_city_code !== (int)$this->sender_city_code;
+        $result = (int)$my_city_code !== (int)$this->sender_city_code;
+        if (!$result) {
+            $this->getLogger()->info(
+                'Проверка адреса: индекс {zip} относится к городу отправителя, способ доставки скрыт',
+                ['zip' => $zip]
+            );
+        }
+
+        return $result;
     }
 
     /**
@@ -217,7 +247,90 @@ final class nrgShipping extends waShipping
             }
         }
 
+        // Логирование, включаемое из настроек на время.
+        // Селект в форме — разовая команда: перевычисляем окно логирования только если пользователь
+        // реально изменил селект в этой сессии (флаг logging[touched]). При сохранении несвязанных
+        // настроек окно не трогаем — оно доживает до logging_until и гаснет само.
+        $logging = (array)($settings['logging'] ?? []);
+        unset($settings['logging']);
+        if (!empty($logging['touched'])) {
+            $duration = max(0, (int)($logging['duration'] ?? 0));
+            $settings['logging_duration'] = $duration;
+            $settings['logging_until'] = $duration > 0 ? time() + $duration : 0;
+        } else {
+            $settings['logging_duration'] = max(0, (int)parent::getSettings('logging_duration'));
+            $settings['logging_until'] = max(0, (int)parent::getSettings('logging_until'));
+        }
+
         return parent::saveSettings($settings);
+    }
+
+    /**
+     * Контрол выбора длительности логирования
+     *
+     * @param string $name
+     * @param array $params
+     * @return string
+     * @throws SmartyException
+     * @throws waException
+     */
+    public function settingLoggingSelect($name, array $params = []): string
+    {
+        $options = [
+            0    => 'Выключено',
+            600  => '10 минут',
+            1800 => '30 минут',
+            3600 => '1 час',
+            7200 => '2 часа',
+        ];
+
+        // Если окно логирования уже истекло, сохранённую длительность не показываем — «Выключено»
+        $logging_until = $this->isLoggingEnabled() ? (int)$this->getSettings('logging_until') : 0;
+        $selected = $logging_until ? (int)$this->getSettings('logging_duration') : 0;
+        if (!array_key_exists($selected, $options)) {
+            $selected = 0;
+        }
+
+        $view = wa()->getView();
+        $view->assign(compact('name', 'params', 'options', 'selected', 'logging_until'));
+
+        return $view->fetch(
+            waConfig::get('wa_path_plugins') . '/shipping/nrg/templates/controls/logging_select.html'
+        );
+    }
+
+    /**
+     * Включено ли логирование прямо сейчас.
+     *
+     * Логирование включается из настроек плагина на ограниченное время и выключается автоматически:
+     * оно активно, пока текущий момент не превысил сохранённую метку logging_until.
+     * От общесистемного режима отладки логирование не зависит.
+     *
+     * @return bool
+     */
+    public function isLoggingEnabled(): bool
+    {
+        return (int)$this->getSettings('logging_until') > time();
+    }
+
+    /**
+     * @return LoggerInterface
+     */
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger ?? new NullLogger();
+    }
+
+    /**
+     * Destructor. Flushes process logger in any case
+     */
+    public function __destruct()
+    {
+        if ($this->logger instanceof ProcessLogger) {
+            if ($log = $this->logger->flush()) {
+                self::log($this->id, $log);
+            }
+        }
     }
 
     /**
@@ -285,23 +398,33 @@ final class nrgShipping extends waShipping
      */
     protected function calculate()
     {
+        $logger = $this->getLogger();
+        $logger->info('Начат процесс расчёта: {id}', ['id' => $this->key]);
+
         if (empty($this->sender_city_code)) {
+            $logger->error('В настройках не определён город отправителя (не указан или не распознан индекс отправителя)');
             return 'Расчет стоимости доставки невозможен';
         }
 
+        $logger->info("Получены поля адреса:\n{var}", ['var' => var_export($this->getAddress(), true)]);
+
         if ($this->getAddress('country') !== 'rus') {
+            $logger->info('Страна доставки не Россия, расчёт невозможен');
             return [['rate' => null, 'comment' => 'Расчет стоимости может быть выполнен только для доставки по России']];
         }
 
         $zip = preg_replace('/\D/u', '', trim((string)$this->getAddress('zip')));
         if (empty($zip)) {
+            $logger->info('Не указан почтовый индекс получателя');
             return array(['rate' => null, 'comment' => 'Не указан почтовый индекс города доставки']);
         }
         if (mb_strlen($zip) != 6) {
+            $logger->info('Неправильный почтовый индекс получателя: {zip}', ['zip' => $zip]);
             return [['rate' => null, 'comment' => 'Неправильный почтовый индекс города доставки']];
         }
 
         if ($this->zero_weight_item == 'stop' && $this->hasZeroWeightItems()) {
+            $logger->info('В заказе есть товары с нулевым весом, расчёт прерван согласно настройкам');
             $msg = preg_replace('/^[[:space:]]*([\s\S]*?)[[:space:]]*$/u', '\1', $this->zero_weight_item_msg);
             return empty($msg) ? 'Недоступно' : $msg;
         }
@@ -309,17 +432,29 @@ final class nrgShipping extends waShipping
         try {
             $target_city = $this->getEnergyAPI()->search_city($zip);
             if (isset($target_city['error'])) {
-                throw new waException('Доставка в город с указанным почтовым индексом невозможна');
+                throw new waException($target_city['error']['message'] ?? 'Доставка в город с указанным почтовым индексом невозможна');
             }
         } catch (waException $e) {
+            $logger->error('Не удалось определить город получателя по индексу {zip}: {message}', [
+                'zip'     => $zip,
+                'message' => $e->getMessage(),
+            ]);
             return [['rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна']];
         }
 
+        $logger->info('Город получателя по индексу {zip}: {name} (id {id})', [
+            'zip'  => $zip,
+            'name' => $target_city['city']['name'] ?? '',
+            'id'   => $target_city['city']['id'] ?? '',
+        ]);
+
         $warehouses = $this->getWarehouses($target_city['city']['id']);
+        $logger->info('Терминалов ТК в городе получателя: {cnt}', ['cnt' => count($warehouses)]);
 
         try {
             $dimensions = $this->getTotalSize();
         } catch (waException $e) {
+            $logger->error('Не удалось определить габариты отправления: {message}', ['message' => $e->getMessage()]);
             return [['rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна']];
         }
 
@@ -331,6 +466,10 @@ final class nrgShipping extends waShipping
             'places'     => 1,
             'items'      => [['weight' => $this->getTotalWeight()] + $dimensions]
         ];
+        $logger->info("Вес отправления {weight} кг, габариты (м):\n{dims}", [
+            'weight' => $this->getTotalWeight(),
+            'dims'   => var_export($dimensions, true),
+        ]);
 
         try {
             $result = $this->getEnergyAPI()->price($request);
@@ -338,11 +477,21 @@ final class nrgShipping extends waShipping
                 throw new waException($result['error']['message'] ?? 'Ошибка');
             }
             if (empty($result['transfer'])) {
-                throw new waException();
+                throw new waException('В ответе сервера нет вариантов доставки (transfer)');
             }
         } catch (waException $e) {
+            $logger->error('Ошибка расчёта стоимости: {message}', ['message' => $e->getMessage()]);
             return [['rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна']];
         }
+
+        $logger->info(
+            'Получено магистральных тарифов: {cnt}; доставка по городу: {delivery}; забор от отправителя: {request}',
+            [
+                'cnt'      => count($result['transfer']),
+                'delivery' => empty($result['delivery']) ? 'нет' : ($result['delivery']['price'] ?? '?'),
+                'request'  => empty($result['request']) ? 'нет' : ($result['request']['price'] ?? '?'),
+            ]
+        );
 
         $to_door = [];
         $ware = [];
@@ -377,7 +526,11 @@ final class nrgShipping extends waShipping
                     $to_door[$id]['est_delivery'] = $estimated_delivery->getWebasystEstDelivery();
                     $to_door[$id]['delivery_date'] = $estimated_delivery->getWebasystDeliveryDates();
                 } catch (Exception $e) {
-                    //todo log
+                    $logger->warning('Вариант {id}: не удалось вычислить срок доставки из «{interval}»: {message}', [
+                        'id'       => $id,
+                        'interval' => (string)($variant['interval'] ?? ''),
+                        'message'  => $e->getMessage(),
+                    ]);
                 }
             }
         }
@@ -407,7 +560,11 @@ final class nrgShipping extends waShipping
                         $ware[$id]['est_delivery'] = $estimated_delivery->getWebasystEstDelivery();
                         $ware[$id]['delivery_date'] = $estimated_delivery->getWebasystDeliveryDates();
                     } catch (Exception $e) {
-                        //todo log
+                        $logger->warning('Вариант {id}: не удалось вычислить срок доставки из «{interval}»: {message}', [
+                            'id'       => $id,
+                            'interval' => (string)($t['interval'] ?? ''),
+                            'message'  => $e->getMessage(),
+                        ]);
                     }
                 }
             }
@@ -415,6 +572,12 @@ final class nrgShipping extends waShipping
 
         // Что показывать в первую очередь
         $rates = $this->show_first == 'todoor' ? $to_door + $ware : $ware + $to_door;
+
+        $logger->info('Всего получилось {cnt} вариантов доставки (до двери: {door}, до терминала: {ware})', [
+            'cnt'  => count($rates),
+            'door' => count($to_door),
+            'ware' => count($ware),
+        ]);
 
         return $rates ?: [['rate' => null, 'comment' => 'Доставка в город с указанным почтовым индексом невозможна']];
     }
@@ -443,20 +606,21 @@ final class nrgShipping extends waShipping
 
         $cities = $cache->get('cities', 'nrg');
         if (empty($cities)) {
-            $net = new waNet(array('format' => waNet::FORMAT_JSON, 'verify' => false));
+            $this->getLogger()->info('Справочника городов нет в кэше, запрашиваем у сервера');
             try {
                 $cities = $this->getEnergyAPI()->cities();
                 if (isset($cities['error'])) {
-                    throw new waException($cities['error']['message']);
+                    throw new waException($cities['error']['message'] ?? 'Ошибка');
                 }
                 $cache->set('cities', $cities, 21600, 'nrg');
             } catch (waException $e) {
+                $this->getLogger()->error('Не удалось получить справочник городов: {message}', ['message' => $e->getMessage()]);
                 $cities = [];
             }
         }
 
         $city = [];
-        foreach ($cities['cityList'] as $c) {
+        foreach ((array)($cities['cityList'] ?? []) as $c) {
             if ($c['id'] == $city_id) {
                 $city = $c;
                 break;
@@ -485,8 +649,16 @@ final class nrgShipping extends waShipping
      */
     protected function init()
     {
-        parent::init();
         require_once 'vendors/autoload.php';
+        // По умолчанию логирование выключено. Уровень поднимаем после parent::init(),
+        // когда настройки способа доставки уже загружены адаптером и доступен logging_until.
+        $this->logger = new ProcessLogger(LogLevel::CRITICAL);
+
+        parent::init();
+
+        if ($this->isLoggingEnabled()) {
+            $this->logger->setLogLevel(LogLevel::INFO);
+        }
     }
 
     /**
@@ -495,6 +667,7 @@ final class nrgShipping extends waShipping
     protected function initControls()
     {
         $this->registerControl('PackageSelect', [$this, 'settingPackageSelect']);
+        $this->registerControl('LoggingSelect', [$this, 'settingLoggingSelect']);
         parent::initControls();
     }
 
@@ -654,6 +827,6 @@ final class nrgShipping extends waShipping
      */
     public function getEnergyAPI(): nrgShippingEnergyAPI
     {
-        return new nrgShippingEnergyAPI();
+        return new nrgShippingEnergyAPI($this->getLogger());
     }
 }

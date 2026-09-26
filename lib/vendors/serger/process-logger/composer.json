@@ -1,0 +1,23 @@
+{
+    "name": "serger/process-logger",
+    "description": "Log all records in internal array",
+    "license":"MIT",
+    "type": "library",
+    "keywords": [
+      "log",
+      "logger"
+    ],
+    "authors": [
+      {
+        "name": "Serge Rodovnichenko",
+        "email": "sergerod@gmail.com"
+      }
+    ],
+    "autoload": {
+        "psr-4": {"SergeR\\" : "src/"}
+    },
+    "require": {
+        "php": ">=5.6.0",
+        "psr/log": "~1.0.0"
+    }
+}

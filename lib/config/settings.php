@@ -146,5 +146,19 @@ return [
         'control_type' => waHtmlControl::INPUT,
         'placeholder'  => 'Недоступно',
         'subject'      => 'main'
-    ]
+    ],
+    // Логирование, включаемое из настроек на время.
+    // logging — только контрол формы (селект длительности), значение не хранится, см. nrgShipping::saveSettings().
+    'logging'                    => [
+        'title'        => 'Логирование',
+        'description'  => 'Плагин запишет процесс расчёта, запросы и ответы сервера ТК «Энергия» в лог-файл ' .
+            'shipping/nrgShipping.log (приложение «Логи»). Логирование выключится автоматически по истечении ' .
+            'выбранного срока. Общесистемный режим отладки включать не нужно.',
+        'control_type' => 'LoggingSelect',
+        'subject'      => 'main'
+    ],
+    // logging_duration — последняя выбранная в селекте длительность (для отображения),
+    // logging_until — момент авто-отключения (unix timestamp); лог активен, пока time() < logging_until
+    'logging_duration'           => ['value' => 0],
+    'logging_until'              => ['value' => 0],
 ];

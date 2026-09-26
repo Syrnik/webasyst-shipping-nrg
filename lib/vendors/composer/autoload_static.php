@@ -11,6 +11,11 @@ class ComposerStaticInit4d0c7bed7569f16832aad3db9cc55c88
         array (
             'Syrnik\\' => 7,
             'SergeR\\Util\\EvalMath\\' => 21,
+            'SergeR\\' => 7,
+        ),
+        'P' => 
+        array (
+            'Psr\\Log\\' => 8,
         ),
     );
 
@@ -22,6 +27,14 @@ class ComposerStaticInit4d0c7bed7569f16832aad3db9cc55c88
         'SergeR\\Util\\EvalMath\\' => 
         array (
             0 => __DIR__ . '/..' . '/serger/eval-math/src',
+        ),
+        'SergeR\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/serger/process-logger/src',
+        ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
         ),
     );
 

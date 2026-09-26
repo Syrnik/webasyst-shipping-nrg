@@ -56,4 +56,10 @@ return [
     '*/phpstan.neon',
     '*/tests/*',
     'http/*',
+    '.github',
+    '.github/*',
+    'AGENTS.md',
+    'LICENSE',
+    'LICENSE_ru',
+    'compress-system-plugin.php',
 ];

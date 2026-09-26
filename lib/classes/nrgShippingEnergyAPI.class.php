@@ -9,7 +9,7 @@ declare(strict_types=1);
 
 final class nrgShippingEnergyAPI
 {
-    private const API_URL = 'https://api2.nrg-tk.ru/v2/';
+    private const API_URL = 'https://api2.nrg-tk.pro/v2/';
 
     /**
      * @param string $zip

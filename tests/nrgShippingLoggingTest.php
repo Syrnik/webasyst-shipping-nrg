@@ -87,6 +87,60 @@ class nrgShippingLoggingTest extends TestCase
         self::assertSame($until, $saved['logging_until']);
     }
 
+    public function testFailedLookupIsLoggedButNothingSaved()
+    {
+        $adapter = new waAppShippingFixture();
+        $adapter->applySettings(self::KEY, ['sender_zip' => '620000', 'sender_city_code' => '343', 'optimize' => 'cheapest']);
+        $plugin = waShipping::factory('nrg', self::KEY, $adapter);
+        $plugin->setEnergyAPI($this->failingAPI());
+
+        try {
+            $plugin->saveSettings([
+                'sender_zip' => '620050',
+                'optimize'   => 'all',
+                'logging'    => ['duration' => '600', 'touched' => '1'],
+            ]);
+            self::fail('Ожидалось исключение');
+        } catch (waException $e) {
+            self::assertSame('Не удалось определить город отправителя по почтовому индексу', $e->getMessage());
+        }
+
+        // Ничего не сохранено, включая окно логирования
+        $saved = $adapter->getSettings('nrg', self::KEY);
+        self::assertArrayNotHasKey('logging_until', $saved);
+        self::assertSame('620000', $saved['sender_zip']);
+        self::assertSame('343', $saved['sender_city_code']);
+        self::assertSame('cheapest', $saved['optimize']);
+        self::assertFalse($plugin->isLoggingEnabled());
+        // Но логгер пересоздан до запроса к API, и неудачная попытка попала в лог
+        self::assertSame(LogLevel::INFO, $this->logLevel($plugin));
+        self::assertStringContainsString('620050', (string)$plugin->getLogger()->flush());
+    }
+
+    public function testFailedLookupDoesNotEnableLoggingWhenNotRequested()
+    {
+        $adapter = new waAppShippingFixture();
+        $plugin = waShipping::factory('nrg', self::KEY, $adapter);
+        $plugin->setEnergyAPI($this->failingAPI());
+
+        try {
+            $plugin->saveSettings(['sender_zip' => '620050', 'logging' => ['duration' => '0', 'touched' => '0']]);
+            self::fail('Ожидалось исключение');
+        } catch (waException $e) {
+        }
+
+        self::assertFalse($plugin->isLoggingEnabled());
+        self::assertSame(LogLevel::CRITICAL, $this->logLevel($plugin));
+    }
+
+    private function failingAPI(): nrgShippingEnergyAPI
+    {
+        $api = $this->createMock(nrgShippingEnergyAPI::class);
+        $api->method('search_city')->willThrowException(new waException('502 Bad Gateway', 502));
+
+        return $api;
+    }
+
     private function plugin(array $settings = []): nrgShipping
     {
         $adapter = new waAppShippingFixture();

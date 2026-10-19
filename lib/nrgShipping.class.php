@@ -232,6 +232,24 @@ final class nrgShipping extends waShipping
      */
     public function saveSettings($settings = []): array
     {
+        // Логирование, включаемое из настроек на время.
+        // Селект в форме — разовая команда: перевычисляем окно логирования только если пользователь
+        // реально изменил селект в этой сессии (флаг logging[touched]). При сохранении несвязанных
+        // настроек окно не трогаем — оно доживает до logging_until и гаснет само.
+        // Окно вычисляем и логгер пересоздаём до проверки индекса: если API недоступен и сохранение
+        // сорвётся, запрос к API всё равно попадёт в лог. Само окно в этом случае не сохраняется.
+        $logging = (array)($settings['logging'] ?? []);
+        unset($settings['logging']);
+        if (!empty($logging['touched'])) {
+            $duration = max(0, (int)($logging['duration'] ?? 0));
+            $settings['logging_duration'] = $duration;
+            $settings['logging_until'] = $duration > 0 ? time() + $duration : 0;
+        } else {
+            $settings['logging_duration'] = max(0, (int)parent::getSettings('logging_duration'));
+            $settings['logging_until'] = max(0, (int)parent::getSettings('logging_until'));
+        }
+        $this->logger = new ProcessLogger($settings['logging_until'] > time() ? LogLevel::INFO : LogLevel::CRITICAL);
+
         if (array_key_exists('sender_zip', $settings)) {
             $settings['sender_city_code'] = '';
             $settings['sender_zip'] = trim($settings['sender_zip'] ?? '');
@@ -244,24 +262,13 @@ final class nrgShipping extends waShipping
                     $settings['sender_city_code'] = $result['city']['id'] ?? '';
                     $settings['sender_city_name'] = $result['city']['name'] ?? '';
                 } catch (waException $e) {
+                    $this->getLogger()->error(
+                        'Сохранение настроек: не удалось определить город отправителя по индексу {zip}: {message}',
+                        ['zip' => $settings['sender_zip'], 'message' => $e->getMessage()]
+                    );
                     throw new waException('Не удалось определить город отправителя по почтовому индексу');
                 }
             }
-        }
-
-        // Логирование, включаемое из настроек на время.
-        // Селект в форме — разовая команда: перевычисляем окно логирования только если пользователь
-        // реально изменил селект в этой сессии (флаг logging[touched]). При сохранении несвязанных
-        // настроек окно не трогаем — оно доживает до logging_until и гаснет само.
-        $logging = (array)($settings['logging'] ?? []);
-        unset($settings['logging']);
-        if (!empty($logging['touched'])) {
-            $duration = max(0, (int)($logging['duration'] ?? 0));
-            $settings['logging_duration'] = $duration;
-            $settings['logging_until'] = $duration > 0 ? time() + $duration : 0;
-        } else {
-            $settings['logging_duration'] = max(0, (int)parent::getSettings('logging_duration'));
-            $settings['logging_until'] = max(0, (int)parent::getSettings('logging_until'));
         }
 
         return parent::saveSettings($settings);
